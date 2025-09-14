@@ -28,16 +28,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Mettre à jour le compteur de panier (exemple)
+    // Mettre à jour le compteur de panier
     updateCartCount();
     
     // Marquer la page active dans la navigation
     markActiveNavItem();
+
+    // Charger header et footer automatiquement
+    loadHTML('header-container', 'header.html');
+    loadHTML('footer-container', 'footer.html');
 });
 
 // Fonction pour mettre à jour le compteur de panier
 function updateCartCount() {
-    // À personnaliser selon votre logique de panier
     const cartCount = localStorage.getItem('cartCount') || 0;
     const cartElement = document.getElementById('cart-count');
     if (cartElement) {
@@ -64,6 +67,7 @@ function markActiveNavItem() {
 async function loadHTML(elementId, filePath) {
     try {
         const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`${filePath} non trouvé`);
         const html = await response.text();
         document.getElementById(elementId).innerHTML = html;
     } catch (error) {
