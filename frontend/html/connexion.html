@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Jeux Olympiques 2024</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/connexion.css">
+    
+</head>
+<body>
+    <!-- Header avec Navigation -->
+    <div id="header-container"></div>
+<main>
+
+    <!-- Contenu Principal -->
+    <div class="main-content">
+        <div class="auth-container">
+            <!-- Section Formulaire -->
+            <div class="form-section">
+                <!-- Messages -->
+                <div class="message success" id="successMessage"></div>
+                <div class="message error" id="errorMessage"></div>
+                
+                <!-- Loading -->
+                <div class="loading" id="loadingSection">
+                    <div class="loading-spinner"></div>
+                    <p>Connexion en cours...</p>
+                </div>
+
+                <!-- Formulaire de Connexion -->
+                <div id="loginForm">
+                    <h2>Connexion</h2>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">Email *</label>
+                            <input type="email" id="loginEmail" name="email" required>
+                            <div class="error-message" id="loginEmailError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword">Mot de passe *</label>
+                            <input type="password" id="loginPassword" name="password" required>
+                            <div class="error-message" id="loginPasswordError"></div>
+                        </div>
+
+                        <button type="submit" class="btn">Se connecter</button>
+                    </form>
+
+                    <div class="forgot-password">
+                        <a href="#" onclick="showForgotPassword()">Mot de passe oublié ?</a>
+                    </div>
+
+                    <div class="switch-form">
+                        <p>Pas encore de compte ? <a href="#" onclick="showRegisterForm()">Créer un compte</a></p>
+                    </div>
+                </div>
+
+                <!-- Formulaire d'Inscription -->
+                <div id="registerForm" style="display: none;">
+                    <h2>Créer un compte</h2>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="firstName">Prénom *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                            <div class="error-message" id="firstNameError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lastName">Nom *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                            <div class="error-message" id="lastNameError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerEmail">Email *</label>
+                            <input type="email" id="registerEmail" name="email" required>
+                            <div class="error-message" id="registerEmailError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPassword">Mot de passe *</label>
+                            <input type="password" id="registerPassword" name="password" required oninput="checkPasswordStrength()">
+                            <div class="password-requirements">
+                                Le mot de passe doit contenir :
+                                <br>• Minimum 8 caractères
+                                <br>• Au moins une majuscule
+                                <br>• Au moins une minuscule  
+                                <br>• Au moins un chiffre
+                                <br>• Au moins un caractère spécial (!@#$%^&*)
+                            </div>
+                            <div class="error-message" id="registerPasswordError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmer le mot de passe *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            <div class="error-message" id="confirmPasswordError"></div>
+                        </div>
+
+                        <button type="submit" class="btn" id="registerBtn">Créer mon compte</button>
+                    </form>
+
+                    <div class="switch-form">
+                        <p>Déjà un compte ? <a href="#" onclick="showLoginForm()">Se connecter</a></p>
+                    </div>
+                </div>
+
+                <!-- Formulaire Mot de Passe Oublié -->
+                <div id="forgotPasswordForm" style="display: none;">
+                    <h2>Mot de passe oublié</h2>
+                    <p style="margin-bottom: 20px; color: #666;">
+                        Saisissez votre adresse email pour recevoir un lien de réinitialisation.
+                    </p>
+                    <form onsubmit="handleForgotPassword(event)">
+                        <div class="form-group">
+                            <label for="forgotEmail">Email *</label>
+                            <input type="email" id="forgotEmail" name="email" required>
+                            <div class="error-message" id="forgotEmailError"></div>
+                        </div>
+
+                        <button type="submit" class="btn">Envoyer le lien</button>
+                    </form>
+
+                    <div class="switch-form">
+                        <p><a href="#" onclick="showLoginForm()">Retour à la connexion</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Bienvenue -->
+            <div class="welcome-section">
+                <div class="olympic-icon">🏅</div>
+                <h3>Bienvenue aux JO 2024</h3>
+                <p>
+                    Rejoignez l'aventure olympique et vivez des moments inoubliables ! 
+                    Créez votre compte pour réserver vos billets en toute sécurité et 
+                    profiter d'une expérience personnalisée.
+                </p>
+                <p style="margin-top: 20px; font-weight: bold;">
+                    ✓ Billets sécurisés avec QR codes<br>
+                    ✓ Téléchargement immédiat<br>
+                    ✓ Support client dédié
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer  -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript commun  -->
+    <script src="../js/common.js"></script>
+    <!-- JavaScript  -->
+    <script src="../js/connexion.js"></script>
+    
+    <!-- Chargement du header et footer -->
+    <script>
+        // Chargement dynamique du header et footer
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadHTML('header-container', 'header.html');
+            await loadHTML('footer-container', 'footer.html');
+        });
+    </script>
+
+    
+</body>
+</html>

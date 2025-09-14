@@ -1,0 +1,203 @@
+/* css/accueil.css - Styles spécifiques à la page d'accueil */
+
+/* Section Héro */
+.hero {
+    background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Section Sports */
+.sports-section {
+    padding: 80px 20px;
+    background: #f8f9fa;
+}
+
+.sports-carousel {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.sports-container {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.sport-card {
+    min-width: 100%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.sport-image {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+}
+
+.sport-content {
+    padding: 30px;
+}
+
+.sport-content h3 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #004e92;
+}
+
+.sport-content p {
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+
+/* Navigation carousel */
+.carousel-nav {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.nav-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #ddd;
+    border-radius: 50%;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.nav-dot.active {
+    background: #004e92;
+}
+
+/* Section Offres */
+.offers-section {
+    padding: 80px 20px;
+    background: white;
+}
+
+.offers-carousel {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.offers-container {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.offer-slide {
+    min-width: 100%;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.offer-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    text-align: center;
+    flex: 1;
+    min-width: 250px;
+    max-width: 350px;
+    border: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.offer-card:hover {
+    transform: translateY(-5px);
+    border-color: #ffd700;
+}
+
+.offer-card.featured {
+    border-color: #ffd700;
+    transform: scale(1.05);
+}
+
+.offer-price {
+    font-size: 2.5rem;
+    color: #004e92;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.offer-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.offer-features {
+    list-style: none;
+    margin-bottom: 30px;
+}
+
+.offer-features li {
+    padding: 5px 0;
+    color: #666;
+}
+
+.offer-features li:before {
+    content: "✓";
+    color: #28a745;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* Sports spécifiques backgrounds */
+.sport-1 { 
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23e3f2fd" width="400" height="300"/><circle fill="%23004e92" cx="200" cy="150" r="80"/><text x="200" y="160" text-anchor="middle" fill="white" font-size="24">Natation</text></svg>'); 
+}
+
+.sport-2 { 
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23e8f5e8" width="400" height="300"/><rect fill="%234caf50" x="150" y="100" width="100" height="100" rx="10"/><text x="200" y="160" text-anchor="middle" fill="white" font-size="20">Athlétisme</text></svg>'); 
+}
+
+.sport-3 { 
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23fff3e0" width="400" height="300"/><circle fill="%23ff9800" cx="200" cy="150" r="60"/><text x="200" y="160" text-anchor="middle" fill="white" font-size="18">Basketball</text></svg>'); 
+}
+
+.sport-4 { 
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23fce4ec" width="400" height="300"/><polygon fill="%23e91e63" points="200,80 160,180 240,180"/><text x="200" y="220" text-anchor="middle" fill="%23e91e63" font-size="20">Surf</text></svg>'); 
+}
+
+/* Responsive spécifique à l'accueil */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .offer-slide {
+        flex-direction: column;
+        align-items: center;
+    }
+}

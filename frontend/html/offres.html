@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offres - Jeux Olympiques 2024</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/offres.css">
+</head>
+<body>
+    <!--header de navigation -->
+    <div id="header-container"></div>
+<main>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Nos Offres de Billets</h1>
+            <p>Choisissez l'offre qui correspond à vos besoins et vivez l'émotion des JO 2024</p>
+        </div>
+    </section>
+
+    <!-- Cart Summary (mobile friendly) -->
+    <div class="cart-summary" id="cartSummary" style="display: none;">
+        <h4>🛒 Mon Panier</h4>
+        <div id="cartItems"></div>
+        <div class="cart-total">
+            Total: <span id="cartTotal">0€</span>
+        </div>
+        <button class="btn" onclick="goToCart()" style="margin-top: 15px; padding: 10px;">Voir le panier</button>
+    </div>
+
+    <!-- Success Message -->
+    <div class="container">
+        <div class="success-message" id="successMessage">
+            ✅ Offre ajoutée au panier avec succès !
+        </div>
+    </div>
+
+    <!-- Sports Selection -->
+    <section class="offers-section">
+        <div class="container">
+            <div class="sports-selection">
+                <h3>🏆 Choisissez votre sport préféré</h3>
+                <div class="sports-grid">
+                    <div class="sport-option" onclick="selectSport(this, 'natation')">
+                        <strong>🏊 Natation</strong><br>
+                        <small>Bassin Olympique</small>
+                    </div>
+                    <div class="sport-option" onclick="selectSport(this, 'athletisme')">
+                        <strong>🏃 Athlétisme</strong><br>
+                        <small>Stade de France</small>
+                    </div>
+                    <div class="sport-option" onclick="selectSport(this, 'basketball')">
+                        <strong>🏀 Basketball</strong><br>
+                        <small>Accor Arena</small>
+                    </div>
+                    <div class="sport-option" onclick="selectSport(this, 'surf')">
+                        <strong>🏄 Surf - Nouveau 2024</strong><br>
+                        <small>Teahupo'o, Tahiti</small>
+                    </div>
+                    <div class="sport-option" onclick="selectSport(this, 'gymnastique')">
+                        <strong>🤸 Gymnastique</strong><br>
+                        <small>Bercy Arena</small>
+                    </div>
+                    <div class="sport-option" onclick="selectSport(this, 'tennis')">
+                        <strong>🎾 Tennis</strong><br>
+                        <small>Roland Garros</small>
+                    </div>
+                </div>
+                <p style="margin-top: 15px; color: #666; font-style: italic;">
+                    💡 Sélectionnez un sport pour personnaliser votre expérience
+                </p>
+            </div>
+
+            <!-- Offers Grid -->
+            <div class="offers-grid">
+                <!-- Offre Solo -->
+                <div class="offer-card">
+                    <div class="offer-header">
+                        <div class="offer-price">75€</div>
+                        <h3 class="offer-title">Offre Solo</h3>
+                        <p class="offer-subtitle">Tarif individuel</p>
+                    </div>
+                    <div class="offer-body">
+                        <div class="offer-description">
+                            Parfait pour une expérience personnelle des JO. Accès à une épreuve de votre choix avec tous les services inclus.
+                        </div>
+                        <ul class="offer-features">
+                            <li>Accès pour 1 personne</li>
+                            <li>Épreuve au choix</li>
+                            <li>Billet électronique sécurisé</li>
+                            <li>Support client standard</li>
+                            <li>Téléchargement PDF</li>
+                            <li>Envoi par email</li>
+                        </ul>
+                        <div class="quantity-selector">
+                            <label>Quantité :</label>
+                            <select id="qty-solo">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="addToCart('solo', 75)">Ajouter au panier</button>
+                        <button class="btn btn-secondary" onclick="showOfferDetails('solo')">Plus de détails</button>
+                    </div>
+                </div>
+
+                <!-- Offre Duo -->
+                <div class="offer-card featured">
+                    <div class="offer-header duo">
+                        <div class="offer-price">130€</div>
+                        <h3 class="offer-title">Offre Duo ⭐</h3>
+                        <p class="offer-subtitle">Tarif préférentiel - Économie de 20€</p>
+                    </div>
+                    <div class="offer-body">
+                        <div class="offer-description">
+                            L'offre idéale pour partager l'émotion olympique à deux ! Bénéficiez d'un tarif avantageux et de services prioritaires.
+                        </div>
+                        <ul class="offer-features">
+                            <li>Accès pour 2 personnes</li>
+                            <li>Économie de 20€ vs 2 billets Solo</li>
+                            <li>Épreuve au choix</li>
+                            <li>Billets électroniques sécurisés</li>
+                            <li>Support client prioritaire</li>
+                            <li>Téléchargement PDF</li>
+                            <li>Envoi par email</li>
+                            <li>Places côte à côte garanties</li>
+                        </ul>
+                        <div class="quantity-selector">
+                            <label>Quantité :</label>
+                            <select id="qty-duo">
+                                <option value="1">1 (2 personnes)</option>
+                                <option value="2">2 (4 personnes)</option>
+                                <option value="3">3 (6 personnes)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="addToCart('duo', 130)">Ajouter au panier</button>
+                        <button class="btn btn-secondary" onclick="showOfferDetails('duo')">Plus de détails</button>
+                    </div>
+                </div>
+
+                <!-- Offre Famille -->
+                <div class="offer-card">
+                    <div class="offer-header famille">
+                        <div class="offer-price">220€</div>
+                        <h3 class="offer-title">Offre Famille</h3>
+                        <p class="offer-subtitle">Meilleur qualité-prix - Économie de 80€</p>
+                    </div>
+                    <div class="offer-body">
+                        <div class="offer-description">
+                            L'offre familiale parfaite ! Vivez les JO en famille avec le meilleur rapport qualité-prix et des services premium.
+                        </div>
+                        <ul class="offer-features">
+                            <li>Accès pour 4 personnes</li>
+                            <li>Économie de 80€ vs 4 billets Solo</li>
+                            <li>Tarif dégressif exceptionnel</li>
+                            <li>Épreuve au choix</li>
+                            <li>Billets électroniques sécurisés</li>
+                            <li>Support client prioritaire</li>
+                            <li>Téléchargement PDF</li>
+                            <li>Envoi par email</li>
+                            <li>Places groupées garanties</li>
+                            <li>Kit souvenir famille offert</li>
+                        </ul>
+                        <div class="quantity-selector">
+                            <label>Quantité :</label>
+                            <select id="qty-famille">
+                                <option value="1">1 (4 personnes)</option>
+                                <option value="2">2 (8 personnes)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="addToCart('famille', 220)">Ajouter au panier</button>
+                        <button class="btn btn-secondary" onclick="showOfferDetails('famille')">Plus de détails</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information importante -->
+            <div class="sports-selection">
+                <h3>ℹ️ Informations importantes</h3>
+                <ul style="list-style-type: disc; padding-left: 20px; color: #666;">
+                    <li>Tous les prix sont TTC (TVA 20% incluse)</li>
+                    <li>Les billets sont nominatifs et non remboursables</li>
+                    <li>Une pièce d'identité sera demandée à l'entrée</li>
+                    <li>Les billets sont valables uniquement pour la date et l'épreuve sélectionnées</li>
+                    <li>Téléchargement disponible immédiatement après paiement</li>
+                    <li>Support client disponible 7j/7 pendant les JO</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</main> 
+    <!-- Footer  -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript commun  -->
+    <script src="../js/common.js"></script>
+    <!-- JavaScript  -->
+    <script src="../js/accueil.js"></script>
+    
+    <!-- Chargement du header et footer -->
+    <script>
+        // Chargement dynamique du header et footer
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadHTML('header-container', 'header.html');
+            await loadHTML('footer-container', 'footer.html');
+        });
+    </script>
+</body>
+</html>

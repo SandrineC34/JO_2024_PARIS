@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeux Olympiques 2024 - Réservation de billets</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/accueil.css">
+</head>
+
+<body>
+    <!--header de navigation -->
+    <div id="header-container"></div>
+<main>
+    <!-- Section Héro -->
+    <section class="hero" id="accueil">
+        <div class="container">
+            <h1>Jeux Olympiques Paris 2024</h1>
+            <p>Découvrez les sports olympiques et réservez vos billets en toute sécurité. Vivez l'émotion des JO avec nos offres exclusives !</p>
+            <a href="#offres" class="btn">Voir les Offres</a>
+        </div>
+    </section>
+
+    <!-- Section Sports -->
+    <section class="sports-section">
+        <div class="container">
+            <h2 class="section-title">Découvrez les Sports</h2>
+            <p class="section-subtitle">Explorez quelques disciplines phares et les nouveaux sports 2024</p>
+            
+            <div class="sports-carousel">
+                <div class="sports-container" id="sportsContainer">
+                    <!-- Sport 1: Natation -->
+                    <div class="sport-card">
+                        <div class="sport-image sport-1"></div>
+                        <div class="sport-content">
+                            <h3>Natation</h3>
+                            <p>Plongez dans l'univers aquatique avec les plus grandes stars de la natation mondiale. Assistez aux courses les plus rapides et aux relais les plus spectaculaires dans le bassin olympique.</p>
+                            <a href="#offres" class="btn">Voir les Offres</a>
+                        </div>
+                    </div>
+
+                    <!-- Sport 2: Athlétisme -->
+                    <div class="sport-card">
+                        <div class="sport-image sport-2"></div>
+                        <div class="sport-content">
+                            <h3>Athlétisme</h3>
+                            <p>La reine des disciplines olympiques ! Sprint, saut, lancers... Vivez l'intensité des épreuves d'athlétisme et encouragez les futurs recordmen du monde.</p>
+                            <a href="#offres" class="btn">Voir les Offres</a>
+                        </div>
+                    </div>
+
+                    <!-- Sport 3: Basketball -->
+                    <div class="sport-card">
+                        <div class="sport-image sport-3"></div>
+                        <div class="sport-content">
+                            <h3>Basketball</h3>
+                            <p>Assistez aux matchs de basketball avec les meilleures équipes mondiales. Dunks spectaculaires et actions rapides garantis dans une ambiance électrisante !</p>
+                            <a href="#offres" class="btn">Voir les Offres</a>
+                        </div>
+                    </div>
+
+                    <!-- Sport 4: Surf (nouveau 2024) -->
+                    <div class="sport-card">
+                        <div class="sport-image sport-4"></div>
+                        <div class="sport-content">
+                            <h3>Surf - Nouveau 2024</h3>
+                            <p>Découvrez le surf, l'une des nouvelles disciplines olympiques ! Regardez les meilleurs surfeurs du monde défier les vagues dans ce sport spectaculaire.</p>
+                            <a href="#offres" class="btn">Voir les Offres</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation points -->
+                <div class="carousel-nav">
+                    <span class="nav-dot active" onclick="showSport(0)"></span>
+                    <span class="nav-dot" onclick="showSport(1)"></span>
+                    <span class="nav-dot" onclick="showSport(2)"></span>
+                    <span class="nav-dot" onclick="showSport(3)"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Offres -->
+    <section class="offers-section" id="offres">
+        <div class="container">
+            <h2 class="section-title">Nos Offres</h2>
+            <p class="section-subtitle">Choisissez l'offre qui vous convient le mieux</p>
+            
+            <div class="offers-carousel">
+                <div class="offers-container" id="offersContainer">
+                    <!-- Offre 1: Solo -->
+                    <div class="offer-slide">
+                        <div class="offer-card">
+                            <div class="offer-price">75€</div>
+                            <h3 class="offer-title">Offre Solo</h3>
+                            <ul class="offer-features">
+                                <li>Accès pour 1 personne</li>
+                                <li>Tarif individuel</li>
+                                <li>Épreuve au choix</li>
+                                <li>Billet électronique</li>
+                                <li>Support client</li>
+                            </ul>
+                            <a href="offres.html" class="btn">Choisir cette offre</a>
+                        </div>
+                    </div>
+
+                    <!-- Offre 2: Duo -->
+                    <div class="offer-slide">
+                        <div class="offer-card featured">
+                            <div class="offer-price">130€</div>
+                            <h3 class="offer-title">Offre Duo</h3>
+                            <ul class="offer-features">
+                                <li>Accès pour 2 personnes</li>
+                                <li>Tarif préférentiel</li>
+                                <li>Économie de 20€</li>
+                                <li>Épreuve au choix</li>
+                                <li>Billets électroniques</li>
+                                <li>Support client prioritaire</li>
+                            </ul>
+                            <a href="offres.html" class="btn">Choisir cette offre</a>
+                        </div>
+                    </div>
+
+                    <!-- Offre 3: Famille -->
+                    <div class="offer-slide">
+                        <div class="offer-card">
+                            <div class="offer-price">220€</div>
+                            <h3 class="offer-title">Offre Famille</h3>
+                            <ul class="offer-features">
+                                <li>Accès pour 4 personnes</li>
+                                <li>Meilleur qualité-prix</li>
+                                <li>Économie de 80€</li>
+                                <li>Tarif dégressif</li>
+                                <li>Épreuve au choix</li>
+                                <li>Billets électroniques</li>
+                                <li>Support client prioritaire</li>
+                            </ul>
+                            <a href="offres.html" class="btn">Choisir cette offre</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation points -->
+                <div class="carousel-nav">
+                    <span class="nav-dot active" onclick="showOffer(0)"></span>
+                    <span class="nav-dot" onclick="showOffer(1)"></span>
+                    <span class="nav-dot" onclick="showOffer(2)"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+</main> 
+ <!-- Footer  -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript commun  -->
+    <script src="../js/common.js"></script>
+    <!-- JavaScript  -->
+    <script src="../js/accueil.js"></script>
+    
+    <!-- Chargement du header et footer -->
+    <script>
+        // Chargement dynamique du header et footer
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadHTML('header-container', 'header.html');
+            await loadHTML('footer-container', 'footer.html');
+        });
+    </script>
+</body>
+</html>

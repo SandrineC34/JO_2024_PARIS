@@ -1,0 +1,249 @@
+body {
+    background-color: #f8f9fa;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+/* Offers Grid */
+.offers-section {
+    padding: 60px 20px;
+}
+
+.offers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.offer-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 3px solid transparent;
+}
+
+.offer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.offer-card.featured {
+    border-color: #ffd700;
+    transform: scale(1.02);
+}
+
+.offer-header {
+    background: #004e92;
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.offer-header.duo {
+    background: linear-gradient(135deg, #004e92, #0066cc);
+}
+
+.offer-header.famille {
+    background: linear-gradient(135deg, #004e92, #28a745);
+}
+
+.offer-price {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.offer-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.offer-subtitle {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.offer-body {
+    padding: 30px;
+}
+
+.offer-features {
+    list-style: none;
+    margin-bottom: 30px;
+}
+
+.offer-features li {
+    padding: 8px 0;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.offer-features li:before {
+    content: "✓";
+    color: #28a745;
+    font-weight: bold;
+    margin-right: 15px;
+    font-size: 1.2rem;
+}
+
+.offer-description {
+    margin-bottom: 25px;
+    color: #555;
+    line-height: 1.7;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.quantity-selector label {
+    font-weight: bold;
+}
+
+.quantity-selector select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.btn {
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.btn:hover {
+    background: #e6c200;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    margin-top: 10px;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Sports Selection */
+.sports-selection {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.sports-selection h3 {
+    color: #004e92;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.sports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.sport-option {
+    padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.sport-option:hover {
+    border-color: #004e92;
+    background: #f8f9ff;
+}
+
+.sport-option.selected {
+    border-color: #ffd700;
+    background: #fffbf0;
+}
+
+/* Success Message */
+.success-message {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+/* Cart Summary */
+.cart-summary {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    min-width: 250px;
+    z-index: 1000;
+}
+
+.cart-summary h4 {
+    margin-bottom: 15px;
+    color: #004e92;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.cart-total {
+    border-top: 2px solid #004e92;
+    padding-top: 15px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .offers-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cart-summary {
+        position: static;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+}

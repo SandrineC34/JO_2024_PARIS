@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Compte - Jeux Olympiques 2024</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/compte.css">
+</head>
+<body>
+    <body>
+    <!--header de navigation -->
+    <div id="header-container"></div>
+<main>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>👤 Mon Compte</h1>
+            <p id="welcomeMessage">Bienvenue dans votre espace personnel</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Messages -->
+            <div class="message success" id="successMessage">
+                ✅ Action réalisée avec succès !
+            </div>
+            <div class="message error" id="errorMessage">
+                ❌ Une erreur s'est produite !
+            </div>
+
+            <div class="account-container">
+                <!-- Sidebar Navigation -->
+                <aside class="account-sidebar">
+                    <nav class="account-nav-container">
+                        <ul class="account-nav">
+                            <li><a href="#" class="nav-link active" data-section="tickets" data-icon="🎫">Mes Billets</a></li>
+                            <li><a href="#" class="nav-link" data-section="orders" data-icon="📋">Mes Commandes</a></li>
+                            <li><a href="#" class="nav-link" data-section="settings" data-icon="⚙️">Paramètres du compte</a></li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <!-- Main Content Area -->
+                <main class="account-content">
+                    <!-- Section Mes Billets -->
+                    <section id="tickets" class="section active">
+                        <h2>🎫 Mes Billets</h2>
+                        <p>Tous vos billets électroniques pour les JO 2024</p>
+
+                        <div class="tickets-grid" id="ticketsContainer">
+                            <!-- Données de test -->
+                            <div class="ticket-card" onclick="toggleTicketDetails(this)">
+                                <div class="ticket-header">
+                                    <div class="ticket-title">Natation - Finale 100m Nage Libre</div>
+                                    <div class="ticket-status status-active">Actif</div>
+                                </div>
+                                <div class="ticket-info">
+                                    📅 25 Juillet 2024, 20:30<br>
+                                    📍 Centre Aquatique - Paris La Défense<br>
+                                    🎫 Billet #JO2024-NAT-001
+                                </div>
+                                <div class="ticket-details">
+                                    <div class="detail-row">
+                                        <span><strong>Numéro du billet :</strong></span>
+                                        <span>JO2024-NAT-001</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span><strong>Statut :</strong></span>
+                                        <span>Actif - Prêt à être utilisé</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span><strong>Place :</strong></span>
+                                        <span>Secteur A - Rangée 15 - Siège 12</span>
+                                    </div>
+                                    <div class="qr-actions">
+                                        <button class="btn btn-primary btn-small" onclick="viewQRCode(event)">👁️ Voir le QR code</button>
+                                        <button class="btn btn-secondary btn-small" onclick="downloadPDF(event)">📄 Télécharger PDF</button>
+                                        <button class="btn btn-outline btn-small" onclick="sendByEmail(event)">📧 Envoyer par email</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ticket-card" onclick="toggleTicketDetails(this)">
+                                <div class="ticket-header">
+                                    <div class="ticket-title">Basketball - Finale Hommes</div>
+                                    <div class="ticket-status status-scanned">Scanné</div>
+                                </div>
+                                <div class="ticket-info">
+                                    📅 10 Août 2024, 21:00<br>
+                                    📍 Accor Arena - Bercy<br>
+                                    🎫 Billet #JO2024-BAS-002
+                                </div>
+                                <div class="ticket-details">
+                                    <div class="detail-row">
+                                        <span><strong>Numéro du billet :</strong></span>
+                                        <span>JO2024-BAS-002</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span><strong>Statut :</strong></span>
+                                        <span>Scanné le 10/08/2024 à 19:45</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span><strong>Place :</strong></span>
+                                        <span>Secteur B - Rangée 8 - Siège 25-26</span>
+                                    </div>
+                                    <div class="qr-actions">
+                                        <button class="btn btn-secondary btn-small" disabled>✅ Billet utilisé</button>
+                                        <button class="btn btn-secondary btn-small" onclick="downloadPDF(event)">📄 Télécharger PDF</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ticket-card" onclick="toggleTicketDetails(this)">
+                                <div class="ticket-header">
+                                    <div class="ticket-title">Athlétisme - 100m Hommes</div>
+                                    <div class="ticket-status status-active">Actif</div>
+                                </div>
+                                <div class="ticket-info">
+                                    📅 4 Août 2024, 21:50<br>
+                                    📍 Stade de France - Saint-Denis<br>
+                                    🎫 Billet #JO2024-ATH-003 (x4)
+                                </div>
+                                <div class="ticket-details">
+                                    <div class="detail-row">
+                                        <span><strong>Numéro du billet :</strong></span>
+                                        <span>JO2024-ATH-003 (Offre Famille)</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span><strong>Statut :</strong></span>
+                                        <span>Actif - Prêt à être utilisé</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span><strong>Places :</strong></span>
+                                        <span>Secteur C - Rangée 20 - Sièges 1-4</span>
+                                    </div>
+                                    <div class="qr-actions">
+                                        <button class="btn btn-primary btn-small" onclick="viewQRCode(event)">👁️ Voir les QR codes</button>
+                                        <button class="btn btn-secondary btn-small" onclick="downloadPDF(event)">📄 Télécharger PDF</button>
+                                        <button class="btn btn-outline btn-small" onclick="sendByEmail(event)">📧 Envoyer par email</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section Mes Commandes -->
+                    <section id="orders" class="section">
+                        <h2>📋 Mes Commandes</h2>
+                        <p>Historique complet de tous vos achats</p>
+
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>N° Commande</th>
+                                    <th>Date & Heure</th>
+                                    <th>Contenu</th>
+                                    <th>Montant</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>CMD-2024-001</strong></td>
+                                    <td>15/06/2024<br>14:25</td>
+                                    <td>
+                                        • Offre Solo - Natation<br>
+                                        • 1x billet à 75€
+                                    </td>
+                                    <td><strong>75€</strong></td>
+                                    <td><span class="ticket-status status-active">Payée</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CMD-2024-002</strong></td>
+                                    <td>20/06/2024<br>09:15</td>
+                                    <td>
+                                        • Offre Duo - Basketball<br>
+                                        • 2x billets à 130€
+                                    </td>
+                                    <td><strong>130€</strong></td>
+                                    <td><span class="ticket-status status-scanned">Utilisée</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CMD-2024-003</strong></td>
+                                    <td>02/07/2024<br>16:42</td>
+                                    <td>
+                                        • Offre Famille - Athlétisme<br>
+                                        • 4x billets à 220€
+                                    </td>
+                                    <td><strong>220€</strong></td>
+                                    <td><span class="ticket-status status-active">Payée</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <!-- Section Paramètres du compte -->
+                    <section id="settings" class="section">
+                        <h2>⚙️ Paramètres du compte</h2>
+                        <p>Gérez vos informations personnelles et votre sécurité</p>
+
+                        <form class="settings-form" onsubmit="saveSettings(event)">
+                            <div class="form-group">
+                                <label for="firstName">Prénom *</label>
+                                <input type="text" id="firstName" name="firstName" value="Jean" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName">Nom *</label>
+                                <input type="text" id="lastName" name="lastName" value="Dupont" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Adresse Email *</label>
+                                <input type="email" id="email" name="email" value="jean.dupont@email.com" required>
+                                <small style="color: #666; margin-top: 5px; display: block;">
+                                    Cette adresse sert d'identifiant de connexion et pour la réception des billets
+                                </small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">💾 Mettre à jour les informations</button>
+                        </form>
+
+                        <hr style="margin: 40px 0; border: 1px solid #e9ecef;">
+
+                        <!-- Changement de mot de passe -->
+                        <h3 style="color: #004e92; margin-bottom: 20px;">🔒 Changer le mot de passe</h3>
+                        <form class="settings-form" onsubmit="changePassword(event)">
+                            <div class="form-group">
+                                <label for="currentPassword">Mot de passe actuel *</label>
+                                <input type="password" id="currentPassword" name="currentPassword" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newPassword">Nouveau mot de passe *</label>
+                                <input type="password" id="newPassword" name="newPassword" required>
+                                <div class="password-requirements">
+                                    <strong>Le mot de passe doit respecter :</strong>
+                                    <ul>
+                                        <li>Minimum 8 caractères</li>
+                                        <li>Au moins une majuscule</li>
+                                        <li>Au moins une minuscule</li>
+                                        <li>Au moins un chiffre</li>
+                                        <li>Au moins un caractère spécial (!@#$%^&*)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirmer le nouveau mot de passe *</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">🔐 Changer le mot de passe</button>
+                        </form>
+
+                        <!-- RGPD et données -->
+                        <hr style="margin: 40px 0; border: 1px solid #e9ecef;">
+                        
+                        <div class="rgpd-info">
+                            <h4>🛡️ Vos données personnelles (RGPD)</h4>
+                            <p>Conformément au RGPD, vous avez le droit de consulter, modifier ou supprimer vos données personnelles.</p>
+                            <button class="btn btn-outline" onclick="downloadUserData()">📥 Télécharger mes données</button>
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="danger-zone">
+                            <h3>⚠️ Zone de danger</h3>
+                            <p>Cette action est irréversible. Toutes vos données seront définitivement supprimées.</p>
+                            <button class="btn btn-danger" onclick="confirmDeleteAccount()">🗑️ Supprimer mon compte</button>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </main>
+</main> 
+ <!-- Footer  -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript commun  -->
+    <script src="../js/common.js"></script>
+    <!-- JavaScript  -->
+    <script src="../js/compte.js"></script>
+    
+    <!-- Chargement du header et footer -->
+    <script>
+        // Chargement dynamique du header et footer
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadHTML('header-container', 'header.html');
+            await loadHTML('footer-container', 'footer.html');
+        });
+    </script>
+</body>
+</html>
+  
+
+   

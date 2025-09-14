@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Panier - Jeux Olympiques 2024</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/panier.css">
+</head>
+<body>
+    <!--header de navigation -->
+    <div id="header-container"></div>
+<main>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>🛒 Mon Panier</h1>
+            <p>Vérifiez votre sélection avant de passer commande</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Messages -->
+            <div class="message success" id="successMessage">
+                ✅ Action réalisée avec succès !
+            </div>
+            <div class="message error" id="errorMessage">
+                ❌ Une erreur s'est produite !
+            </div>
+
+            <!-- Login Notice -->
+            <div class="login-notice" id="loginNotice">
+                ⚠️ <strong>Connexion requise :</strong> Vous devez être connecté pour continuer votre commande.
+                <button class="btn btn-primary" onclick="goToLogin()" style="margin-left: 15px;">Se connecter</button>
+            </div>
+
+            <div class="cart-container">
+                <!-- Cart Items -->
+                <section class="cart-items">
+                    <h2>Articles dans votre panier</h2>
+                    
+                    <!-- Empty Cart -->
+                    <div class="empty-cart" id="emptyCart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h3>Votre panier est vide</h3>
+                        <p>Découvrez nos offres exceptionnelles pour les JO 2024 !</p>
+                        <a href="offres.html" class="btn btn-primary" style="margin-top: 20px;">Voir les offres</a>
+                    </div>
+
+                    <!-- Cart Items List -->
+                    <div id="cartItemsList">
+                        <!-- Items will be dynamically added here -->
+                    </div>
+
+                    <!-- Cart Actions -->
+                    <div class="cart-actions" id="cartActions" style="display: none;">
+                        <div class="selection-actions">
+                            <button class="btn btn-danger" onclick="deleteSelected()" id="deleteBtn" disabled>
+                                🗑️ Supprimer sélection
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearCart()">
+                                🗑️ Vider le panier
+                            </button>
+                        </div>
+                        <div>
+                            <a href="offres.html" class="btn btn-outline">Continuer les achats</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Order Summary -->
+                <aside class="order-summary" id="orderSummary" style="display: none;">
+                    <h3>📋 Récapitulatif de commande</h3>
+                    
+                    <div class="summary-line">
+                        <span>Sous-total HT :</span>
+                        <span id="subtotalHT">0€</span>
+                    </div>
+                    
+                    <div class="summary-line subtotal">
+                        <span>TVA (20%) :</span>
+                        <span id="taxAmount">0€</span>
+                    </div>
+                    
+                    <div class="summary-line total">
+                        <span>Total TTC :</span>
+                        <span id="totalTTC">0€</span>
+                    </div>
+
+                    <div class="tax-info">
+                        💡 <strong>Prix TTC :</strong> Tous les prix affichés incluent la TVA au taux de 20%.
+                    </div>
+
+                    <button class="btn btn-primary checkout-btn" onclick="proceedToCheckout()">
+                        🎫 Passer commande
+                    </button>
+                    
+                    <button class="btn btn-outline" onclick="goBack()" style="width: 100%;">
+                        ⬅️ Retour au panier
+                    </button>
+                </aside>
+            </div>
+        </div>
+    </main>
+</main> 
+ <!-- Footer  -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript commun  -->
+    <script src="../js/common.js"></script>
+    <!-- JavaScript  -->
+    <script src="../js/accueil.js"></script>
+    
+    <!-- Chargement du header et footer -->
+    <script>
+        // Chargement dynamique du header et footer
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadHTML('header-container', 'header.html');
+            await loadHTML('footer-container', 'footer.html');
+        });
+    </script>
+</body>
+</html>      

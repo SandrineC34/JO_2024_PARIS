@@ -1,0 +1,86 @@
+/* Main Content */
+.main-content {
+    padding: 40px 20px;
+}
+
+.account-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+}
+
+/* Sidebar Navigation */
+.account-sidebar {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.account-nav {
+    list-style: none;
+}
+
+.account-nav li {
+    margin-bottom: 10px;
+}
+
+.account-nav a {
+    display: block;
+    padding: 15px 20px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.account-nav a:hover {
+    background: #f8f9fa;
+    color: #004e92;
+}
+
+.account-nav a.active {
+    background: #004e92;
+    color: white;
+}
+
+.account-nav a::before {
+    content: attr(data-icon);
+    margin-right: 10px;
+}
+
+/* Main Content Area */
+.account-content {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+.section h2 {
+    color: #004e92;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    border-bottom: 3px solid #ffd700;
+    padding-bottom: 15px;
+}
+
+/* Messages */
+.message {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+}
