@@ -10,6 +10,9 @@ git add .
 git commit -m "Initial Commit static page web"
 
 # Creation d'unnouveau projet dans github
+git checkout main
+git pull
+git merge dev
 
 
 # Lier le repository
