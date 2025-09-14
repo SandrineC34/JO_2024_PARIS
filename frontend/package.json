@@ -1,10 +1,16 @@
 {
-  "name": "ecommerce-frontend",
+  "name": "ecommerce-app",
   "version": "1.0.0",
+  "description": "Application e-commerce statique",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js"
+    "start": "npx serve -s . -l $PORT",
+    "build": "echo 'No build needed for static site'"
   },
   "dependencies": {
-    "express": "^4.18.0"
+    "serve": "^14.2.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
