@@ -1,0 +1,10 @@
+{
+  "name": "mon-projet-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx serve ./html -s"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}

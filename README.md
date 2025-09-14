@@ -16,12 +16,6 @@ git commit -m "Initial Commit static page web"
 git remote add origin https://github.com/SandrineC34/JO_2024_PARIS.git
 
 # Etape n°1 déploiement de l'application statique uniquement
-il faut se positionner dans le répertoire wwwroot  et initialiser Git
-#Se connecter à Heroku
-    heroku login
-# Creer une app heroku
-    heroku create <nom de l'app>
-# Déployer 
-    git push heroku main
-# Ouvrir l'app 
-    Heroku open
+utilisation de RAilway
+test en local (docker desktop doit être ouvert)
+docker-compose up frontend
