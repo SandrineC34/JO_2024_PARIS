@@ -22,6 +22,6 @@ git push -u origin dev
 git remote add origin https://github.com/SandrineC34/JO_2024_PARIS.git
 
 # Etape n°1 déploiement de l'application statique uniquement
-utilisation de RAilway
-test en local (docker desktop doit être ouvert)
-docker-compose up frontend
+render 
+Build Command : npm install
+Start Command : npm start
