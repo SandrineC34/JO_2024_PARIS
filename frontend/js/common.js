@@ -1,4 +1,4 @@
-// js/common.js - Fonctionnalités communes (version production)
+// js/common.js - Fonctionnalités communes (version statique)
 
 // Menu mobile
 function toggleMenu() {
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     markActiveNavItem();
     
     // Charger header et footer automatiquement
-    loadHTML('header-container', '/header.html');
-    loadHTML('footer-container', '/footer.html');
+    loadHTML('header-container', './header.html');
+    loadHTML('footer-container', './footer.html');
 });
 
 // Fonction pour mettre à jour le compteur de panier
@@ -57,25 +57,28 @@ function markActiveNavItem() {
         const href = link.getAttribute('href');
         if (href === currentPage || 
             (currentPage === '' && href === 'index.html') ||
-            (currentPage === 'index.html' && href === '/') ||
-            (currentPage === 'accueil.html' && href === 'index.html')) {
+            (currentPage === 'index.html' && href === './') ||
+            (currentPage.includes('index') && href === './')) {
             link.classList.add('active');
         }
     });
 }
 
-// Fonction utilitaire pour charger du contenu dynamiquement (mise à jour pour production)
+// Fonction utilitaire pour charger du contenu dynamiquement
 async function loadHTML(elementId, filePath) {
     try {
         const response = await fetch(filePath);
-        if (!response.ok) throw new Error(`${filePath} non trouvé`);
+        if (!response.ok) {
+            console.warn(`${filePath} non trouvé - vérifiez le chemin`);
+            return;
+        }
         const html = await response.text();
         const element = document.getElementById(elementId);
         if (element) {
             element.innerHTML = html;
         }
     } catch (error) {
-        console.error('Erreur lors du chargement de', filePath, ':', error);
-        // Fallback silencieux en production
+        console.warn('Header/Footer non chargé:', filePath);
+        // En statique, c'est normal si les fichiers n'existent pas encore
     }
 }
