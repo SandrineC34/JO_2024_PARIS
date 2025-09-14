@@ -1,4 +1,4 @@
-// js/common.js - Fonctionnalités communes
+// js/common.js - Fonctionnalités communes (version production)
 
 // Menu mobile
 function toggleMenu() {
@@ -20,23 +20,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
+    
     // Fermer le menu mobile quand on clique sur un lien
     document.querySelectorAll('#navMenu a').forEach(link => {
         link.addEventListener('click', () => {
             document.getElementById('navMenu').classList.remove('active');
         });
     });
-
+    
     // Mettre à jour le compteur de panier
     updateCartCount();
     
     // Marquer la page active dans la navigation
     markActiveNavItem();
-
+    
     // Charger header et footer automatiquement
-    loadHTML('header-container', 'header.html');
-    loadHTML('footer-container', 'footer.html');
+    loadHTML('header-container', '/header.html');
+    loadHTML('footer-container', '/footer.html');
 });
 
 // Fonction pour mettre à jour le compteur de panier
@@ -50,27 +50,32 @@ function updateCartCount() {
 
 // Fonction pour marquer l'élément de navigation actif
 function markActiveNavItem() {
-    const currentPage = window.location.pathname.split('/').pop() || 'accueil.html';
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('#navMenu a');
     
     navLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (href === currentPage || 
-            (currentPage === '' && href === 'accueil.html') ||
-            (currentPage === 'index.html' && href === 'accueil.html')) {
+            (currentPage === '' && href === 'index.html') ||
+            (currentPage === 'index.html' && href === '/') ||
+            (currentPage === 'accueil.html' && href === 'index.html')) {
             link.classList.add('active');
         }
     });
 }
 
-// Fonction utilitaire pour charger du contenu dynamiquement
+// Fonction utilitaire pour charger du contenu dynamiquement (mise à jour pour production)
 async function loadHTML(elementId, filePath) {
     try {
         const response = await fetch(filePath);
         if (!response.ok) throw new Error(`${filePath} non trouvé`);
         const html = await response.text();
-        document.getElementById(elementId).innerHTML = html;
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = html;
+        }
     } catch (error) {
         console.error('Erreur lors du chargement de', filePath, ':', error);
+        // Fallback silencieux en production
     }
 }
