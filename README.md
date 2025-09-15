@@ -13,10 +13,16 @@ git commit -m "Initial Commit static page web"
 git checkout main
 git pull
 git merge dev
-git push
+
 
 # Mise à jour de branch distante
 git push -u origin dev
+
+
+# Creation du backend
+mkdir backend
+cd backend
+dotnet new webapi -n JO2024API
 
 # Lier le repository
 git remote add origin https://github.com/SandrineC34/JO_2024_PARIS.git

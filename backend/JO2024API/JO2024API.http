@@ -1,0 +1,6 @@
+@JO2024API_HostAddress = http://localhost:5274
+
+GET {{JO2024API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
