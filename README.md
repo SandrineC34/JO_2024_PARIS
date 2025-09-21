@@ -31,3 +31,7 @@ git remote add origin https://github.com/SandrineC34/JO_2024_PARIS.git
 render 
 Build Command : npm install
 Start Command : npm start
+
+
+# Lire le manuel 
+python .\ouvrir_manuel.py
