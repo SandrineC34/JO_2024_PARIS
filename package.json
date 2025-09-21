@@ -1,0 +1,15 @@
+{
+  "name": "ecommerce-app",
+  "version": "1.0.0",
+  "description": "Application e-commerce HTML/CSS/JS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
