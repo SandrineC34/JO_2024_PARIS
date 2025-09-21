@@ -1,4 +1,4 @@
-// js/common.js - Fonctionnalités communes (version statique)
+// js/common.js - Fonctionnalités communes (structure frontend/)
 
 // Menu mobile
 function toggleMenu() {
@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Marquer la page active dans la navigation
     markActiveNavItem();
     
-    // Charger header et footer automatiquement
-    loadHTML('header-container', './header.html');
-    loadHTML('footer-container', './footer.html');
+    // Charger header et footer automatiquement (chemins adaptés)
+    loadHTML('header-container', '/header.html');
+    loadHTML('footer-container', '/footer.html');
 });
 
 // Fonction pour mettre à jour le compteur de panier
@@ -57,8 +57,8 @@ function markActiveNavItem() {
         const href = link.getAttribute('href');
         if (href === currentPage || 
             (currentPage === '' && href === 'index.html') ||
-            (currentPage === 'index.html' && href === './') ||
-            (currentPage.includes('index') && href === './')) {
+            (currentPage === 'index.html' && href === '/') ||
+            (currentPage === '/' && href === 'index.html')) {
             link.classList.add('active');
         }
     });
@@ -78,7 +78,6 @@ async function loadHTML(elementId, filePath) {
             element.innerHTML = html;
         }
     } catch (error) {
-        console.warn('Header/Footer non chargé:', filePath);
-        // En statique, c'est normal si les fichiers n'existent pas encore
+        console.warn('Erreur lors du chargement de', filePath, ':', error);
     }
 }
