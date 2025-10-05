@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Base de données MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: jo_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: RootPassword123!
+      MYSQL_DATABASE: jeuxolympiques
+      MYSQL_USER: jo_user
+      MYSQL_PASSWORD: JO2024Password!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - jo_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Application ASP.NET Core
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jo_webapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=jeuxolympiques;User=jo_user;Password=JO2024Password!;
+    ports:
+      - "5000:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - jo_network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  jo_network:
+    driver: bridge

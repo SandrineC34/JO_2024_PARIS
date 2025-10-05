@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Compte - Jeux Olympiques 2024</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/compte.css">
+</head>
+<body>
+    <!-- Header de navigation -->
+    <div id="header-container"></div>
+
+    <main>
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="container">
+                <h1>👤 Mon Compte</h1>
+                <p id="welcomeMessage">Bienvenue dans votre espace personnel</p>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
+                <!-- Messages -->
+                <div class="message success" id="successMessage">✅ Action réalisée avec succès !</div>
+                <div class="message error" id="errorMessage">❌ Une erreur s'est produite !</div>
+
+                <div class="account-container">
+                    <!-- Sidebar Navigation -->
+                    <aside class="account-sidebar">
+                        <nav class="account-nav-container">
+                            <ul class="account-nav">
+                                <li><a href="#" class="nav-link active" data-section="tickets">🎫 Mes Billets</a></li>
+                                <li><a href="#" class="nav-link" data-section="orders">📋 Mes Commandes</a></li>
+                                <li><a href="#" class="nav-link" data-section="settings">⚙️ Paramètres du compte</a></li>
+                            </ul>
+                        </nav>
+                    </aside>
+
+                    <!-- Account Content -->
+                    <div class="account-content">
+                        <!-- Section Mes Billets -->
+                        <section id="tickets" class="section active">
+                            <h2>🎫 Mes Billets</h2>
+                            <p>Tous vos billets électroniques pour les JO 2024</p>
+
+                            <div class="tickets-grid" id="ticketsContainer">
+                                <!-- Exemple de billet -->
+                                <div class="ticket-card" onclick="toggleTicketDetails(this)">
+                                    <div class="ticket-header">
+                                        <div class="ticket-title">Natation - Finale 100m Nage Libre</div>
+                                        <div class="ticket-status status-active">Actif</div>
+                                    </div>
+                                    <div class="ticket-info">
+                                        📅 25 Juillet 2024, 20:30<br>
+                                        📍 Centre Aquatique - Paris La Défense<br>
+                                        🎫 Billet #JO2024-NAT-001
+                                    </div>
+                                    <div class="ticket-details">
+                                        <div class="detail-row"><strong>Numéro du billet :</strong> JO2024-NAT-001</div>
+                                        <div class="detail-row"><strong>Statut :</strong> Actif - Prêt à être utilisé</div>
+                                        <div class="detail-row"><strong>Place :</strong> Secteur A - Rangée 15 - Siège 12</div>
+                                        <div class="qr-actions">
+                                            <button class="btn btn-primary btn-small" onclick="viewQRCode(event)">👁️ Voir QR code</button>
+                                            <button class="btn btn-secondary btn-small" onclick="downloadPDF(event)">📄 Télécharger PDF</button>
+                                            <button class="btn btn-outline btn-small" onclick="sendByEmail(event)">📧 Envoyer par email</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Section Mes Commandes -->
+                        <section id="orders" class="section">
+                            <h2>📋 Mes Commandes</h2>
+                            <p>Historique de vos achats</p>
+
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>N° Commande</th>
+                                        <th>Date & Heure</th>
+                                        <th>Contenu</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>CMD-2024-001</strong></td>
+                                        <td>15/06/2024<br>14:25</td>
+                                        <td>• Offre Solo - Natation<br>• 1x billet à 75€</td>
+                                        <td><strong>75€</strong></td>
+                                        <td><span class="ticket-status status-active">Payée</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CMD-2024-002</strong></td>
+                                        <td>20/06/2024<br>09:15</td>
+                                        <td>• Offre Duo - Basketball<br>• 2x billets à 130€</td>
+                                        <td><strong>130€</strong></td>
+                                        <td><span class="ticket-status status-scanned">Utilisée</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
+
+                        <!-- Section Paramètres -->
+                        <section id="settings" class="section">
+                            <h2>⚙️ Paramètres du compte</h2>
+                            <p>Gérez vos informations personnelles et votre sécurité</p>
+
+                            <form class="settings-form" onsubmit="saveSettings(event)">
+                                <div class="form-group">
+                                    <label for="firstName">Prénom *</label>
+                                    <input type="text" id="firstName" name="firstName" value="Jean" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Nom *</label>
+                                    <input type="text" id="lastName" name="lastName" value="Dupont" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Adresse Email *</label>
+                                    <input type="email" id="email" name="email" value="jean.dupont@email.com" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">💾 Mettre à jour</button>
+                            </form>
+
+                            <hr>
+
+                            <h3>🔒 Changer le mot de passe</h3>
+                            <form class="settings-form" onsubmit="changePassword(event)">
+                                <div class="form-group">
+                                    <label for="currentPassword">Mot de passe actuel *</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">Nouveau mot de passe *</label>
+                                    <input type="password" id="newPassword" name="newPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirmer le nouveau mot de passe *</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">🔐 Changer</button>
+                            </form>
+
+                            <hr>
+
+                            <div class="danger-zone">
+                                <h3>⚠️ Zone de danger</h3>
+                                <p>Action irréversible : toutes vos données seront supprimées.</p>
+                                <button class="btn btn-danger" onclick="confirmDeleteAccount()">🗑️ Supprimer mon compte</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- JavaScript commun -->
+    <script src="../js/common.js"></script>
+    <!-- JavaScript spécifique -->
+    <script src="../js/compte.js"></script>
+</body>
+</html>
