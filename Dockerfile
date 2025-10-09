@@ -1,21 +1,28 @@
-# Dockerfile pour votre application JO
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
+# Étape 1 : Build de l’application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["JeuxOlympiques.csproj", "./"]
+
+# Copier uniquement le fichier projet pour restaurer les dépendances
+COPY ["JeuxOlympiques.csproj", "."]
 RUN dotnet restore "JeuxOlympiques.csproj"
+
+# Copier le reste du projet
 COPY . .
-WORKDIR "/src"
+
+# Compiler le projet en mode Release
 RUN dotnet build "JeuxOlympiques.csproj" -c Release -o /app/build
 
+# Étape 2 : Publication
 FROM build AS publish
-RUN dotnet publish "JeuxOlympiques.csproj" -c Release -o /app/publish
+RUN dotnet publish "JeuxOlympiques.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+# Étape 3 : Exécution
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Port d’écoute
+EXPOSE 8080
+
+# Lancement de l’application
 ENTRYPOINT ["dotnet", "JeuxOlympiques.dll"]

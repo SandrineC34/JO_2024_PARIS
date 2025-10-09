@@ -168,11 +168,11 @@
     },
     {
       "id": 5,
-      "nom": "Football - Finale",
+      "nom": "Tennis - Finale",
       "date": "2024-08-09T18:00:00",
-      "lieu": "Parc des Princes",
-      "categorie": "Football",
-      "description": "Finale du tournoi de football masculin"
+      "lieu": "Rolland Garros",
+      "categorie": "Tennis",
+      "description": "Finale du tournoi de Tennis masculin"
     }
   ]
 }

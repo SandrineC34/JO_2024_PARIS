@@ -1,0 +1,165 @@
+# Pipeline CI/CD pour JO 2024 - GitLab
+# Version: 1.0
+
+# Définition des stages
+stages:
+  - test
+  - build
+  - deploy
+
+# Variables globales
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  MYSQL_ROOT_PASSWORD: "RootPassword123!"
+  MYSQL_DATABASE: "jeuxolympiques"
+  MYSQL_USER: "jo_user"
+  MYSQL_PASSWORD: "JO2024Password!"
+
+# ======================================
+# STAGE 1: TESTS UNITAIRES
+# ======================================
+
+test:unit:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  services:
+    - mysql:8.0
+  variables:
+    MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+    MYSQL_DATABASE: $MYSQL_DATABASE
+    MYSQL_USER: $MYSQL_USER
+    MYSQL_PASSWORD: $MYSQL_PASSWORD
+  before_script:
+    - cd backend/"JO 2024 PARIS"
+    - echo "🔧 Restauration des dépendances..."
+    - dotnet restore
+  script:
+    - echo "Exécution des tests unitaires..."
+    - dotnet test JO2024API.Tests/JO2024API.Tests.csproj 
+        --configuration Release 
+        --logger "trx;LogFileName=test_results.trx" 
+        --logger "console;verbosity=detailed"
+        --collect:"XPlat Code Coverage"
+        /p:CollectCoverage=true 
+        /p:CoverletOutputFormat=cobertura
+    - echo "✅ Tests terminés avec succès"
+  artifacts:
+    when: always
+    paths:
+      - backend/"JO 2024 PARIS"/JO2024API.Tests/TestResults/
+      - backend/"JO 2024 PARIS"/JO2024API.Tests/coverage.cobertura.xml
+    reports:
+      junit:
+        - backend/"JO 2024 PARIS"/JO2024API.Tests/TestResults/*.trx
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/"JO 2024 PARIS"/JO2024API.Tests/coverage.cobertura.xml
+    expire_in: 30 days
+  coverage: '/Total\s+\|\s+(\d+\.?\d*)%/'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+
+# ======================================
+# STAGE 2: BUILD DOCKER (Branche DEV)
+# ======================================
+
+build:dev:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker info
+    - echo "🔨 Build de l'environnement de développement..."
+  script:
+    - echo "📦 Construction des images Docker..."
+    - docker-compose -f docker-compose2.yml build
+    - echo "✅ Build terminé avec succès"
+  only:
+    - dev
+  dependencies:
+    - test:unit
+
+# ======================================
+# STAGE 3: BUILD DOCKER (Branche MAIN)
+# ======================================
+
+build:production:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker info
+    - echo "🔨 Build de l'environnement de production..."
+  script:
+    - echo "📦 Construction des images Docker pour production..."
+    - docker-compose -f docker-compose.yml build
+    - echo "🏷️ Tag des images..."
+    - docker tag jo_webapp:latest $CI_REGISTRY_IMAGE/webapp:$CI_COMMIT_SHORT_SHA
+    - docker tag jo_webapp:latest $CI_REGISTRY_IMAGE/webapp:latest
+    - echo "✅ Build production terminé"
+  only:
+    - main
+  dependencies:
+    - test:unit
+
+# ======================================
+# STAGE 4: DEPLOY PRODUCTION (Optionnel)
+# ======================================
+
+deploy:production:
+  stage: deploy
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - echo "🚀 Préparation du déploiement..."
+  script:
+    - echo "📤 Déploiement de l'application..."
+    - docker-compose -f docker-compose.yml up -d
+    - echo "✅ Déploiement terminé avec succès"
+  environment:
+    name: production
+    url: http://votre-domaine.com
+  only:
+    - main
+  when: manual  # Déploiement manuel pour plus de sécurité
+  dependencies:
+    - build:production
+
+# ======================================
+# JOB OPTIONNEL: ANALYSE DE CODE
+# ======================================
+
+code:quality:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  before_script:
+    - cd backend/"JO 2024 PARIS"
+    - dotnet restore
+  script:
+    - echo "🔍 Analyse de qualité du code..."
+    - dotnet format --verify-no-changes --verbosity diagnostic
+  allow_failure: true
+  only:
+    - dev
+    - merge_requests
+
+# ======================================
+# JOB OPTIONNEL: SÉCURITÉ
+# ======================================
+
+security:scan:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  before_script:
+    - cd backend/"JO 2024 PARIS"
+  script:
+    - echo "🔒 Scan de sécurité des dépendances..."
+    - dotnet list package --vulnerable --include-transitive
+  allow_failure: true
+  only:
+    - dev
+    - merge_requests
