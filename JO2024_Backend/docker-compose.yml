@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: jo2024_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: RootPassword123!
+      MYSQL_DATABASE: jo2024_db
+      MYSQL_USER: jo2024_user
+      MYSQL_PASSWORD: JO2024Pass123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - jo2024_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: jo2024_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: jo2024_user
+      PMA_PASSWORD: JO2024Pass123!
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - jo2024_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jo2024_api
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=jo2024_db;User=jo2024_user;Password=JO2024Pass123!;
+    ports:
+      - "5000:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - jo2024_network
+
+volumes:
+  mysql_data:
+
+networks:
+  jo2024_network:
+    driver: bridge

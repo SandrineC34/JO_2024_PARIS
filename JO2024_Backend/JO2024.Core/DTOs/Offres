@@ -1,0 +1,16 @@
+/ ============================================
+// Offre DTOs
+// JO2024.Core/DTOs/Offres/
+// ============================================
+namespace JO2024.Core.DTOs.Offres;
+
+public class OffreDto
+{
+    public int Id { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public string Nom { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Prix { get; set; }
+    public int NombrePersonnes { get; set; }
+    public string? Caracteristiques { get; set; }
+}
