@@ -25,6 +25,8 @@ public class Utilisateur
     [Required]
     public string MotDePasseHash { get; set; } = string.Empty;
 
+     public string Role { get; set; } = "Utilisateur"; 
+
     public DateTime DateCreation { get; set; } = DateTime.UtcNow;
     
     public DateTime? DerniereConnexion { get; set; }

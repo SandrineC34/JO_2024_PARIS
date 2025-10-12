@@ -8,6 +8,7 @@ using JO2024.Infrastructure.Data;
 using JO2024.Core.Interfaces;
 using JO2024.Core.Services;
 using JO2024.Infrastructure.Repositories;
+using JO2024.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

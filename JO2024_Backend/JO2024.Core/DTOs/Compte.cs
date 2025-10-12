@@ -3,6 +3,10 @@
 // JO2024.Core/DTOs/Compte/
 // ============================================
 using System.ComponentModel.DataAnnotations;
+using JO2024.Core.DTOs.Admin;
+using JO2024.Core.DTOs.Commandes;
+using JO2024.Core.DTOs.Billets;
+using JO2024.Core.DTOs.Auth;
 
 namespace JO2024.Core.DTOs.Compte;
 

@@ -1,6 +1,7 @@
 // ============================================
 // BilletService.cs
 // ============================================
+using JO2024.Core.Entities; 
 using JO2024.Core.Interfaces;
 using JO2024.Core.DTOs.Billets;
 

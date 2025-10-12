@@ -4,6 +4,7 @@
 using JO2024.Core.Entities;
 using JO2024.Core.Interfaces;
 using JO2024.Core.DTOs.Commandes;
+using JO2024.Core.DTOs.Billets; 
 
 namespace JO2024.Core.Services;
 
