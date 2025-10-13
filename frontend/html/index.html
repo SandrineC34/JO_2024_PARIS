@@ -11,6 +11,7 @@
 <body>
     <!--header de navigation -->
     <div id="header-container"></div>
+    
 <main>
     <!-- Section Héro -->
     <section class="hero" id="accueil">
@@ -35,7 +36,7 @@
                         <div class="sport-content">
                             <h3>Natation</h3>
                             <p>Plongez dans l'univers aquatique avec les plus grandes stars de la natation mondiale. Assistez aux courses les plus rapides et aux relais les plus spectaculaires dans le bassin olympique.</p>
-                            <a href="#offres" class="btn">Voir les Offres</a>
+                            <a href="offres.html" class="btn">Voir les Offres</a>
                         </div>
                     </div>
 
@@ -45,7 +46,7 @@
                         <div class="sport-content">
                             <h3>Athlétisme</h3>
                             <p>La reine des disciplines olympiques ! Sprint, saut, lancers... Vivez l'intensité des épreuves d'athlétisme et encouragez les futurs recordmen du monde.</p>
-                            <a href="#offres" class="btn">Voir les Offres</a>
+                            <a href="offres.html" class="btn">Voir les Offres</a>
                         </div>
                     </div>
 
@@ -55,7 +56,7 @@
                         <div class="sport-content">
                             <h3>Basketball</h3>
                             <p>Assistez aux matchs de basketball avec les meilleures équipes mondiales. Dunks spectaculaires et actions rapides garantis dans une ambiance électrisante !</p>
-                            <a href="#offres" class="btn">Voir les Offres</a>
+                            <a href="offres.html" class="btn">Voir les Offres</a>
                         </div>
                     </div>
 
@@ -65,7 +66,7 @@
                         <div class="sport-content">
                             <h3>Surf - Nouveau 2024</h3>
                             <p>Découvrez le surf, l'une des nouvelles disciplines olympiques ! Regardez les meilleurs surfeurs du monde défier les vagues dans ce sport spectaculaire.</p>
-                            <a href="#offres" class="btn">Voir les Offres</a>
+                            <a href="offres.html" class="btn">Voir les Offres</a>
                         </div>
                     </div>
                 </div>
@@ -151,9 +152,49 @@
         </div>
     </section>
 </main> 
- <!-- Footer  -->
+
+    <!-- Footer  -->
     <div id="footer-container"></div>
 
+    <!-- Script de chargement du header et footer -->
+    <script>
+        // Chargement du header et footer - Version recommandée
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Fonction pour charger un composant
+            const loadComponent = async (containerId, filename) => {
+                try {
+                    const response = await fetch(filename);
+                    if (response.ok) {
+                        const html = await response.text();
+                        const container = document.getElementById(containerId);
+                        if (container) {
+                            container.innerHTML = html;
+                            console.log(`✅ ${filename} chargé avec succès`);
+                        }
+                    } else {
+                        console.error(`❌ Erreur ${response.status} lors du chargement de ${filename}`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Erreur lors du chargement de ${filename}:`, error);
+                }
+            };
+            
+            // Charger le header et le footer (même dossier que index.html)
+            await loadComponent('header-container', 'header.html');
+            await loadComponent('footer-container', 'footer.html');
+            
+            // Petite pause pour s'assurer que le DOM est mis à jour
+            setTimeout(() => {
+                // Réinitialiser le compteur du panier après chargement du header
+                const cartCount = localStorage.getItem('cartCount') || 0;
+                const cartElement = document.getElementById('cart-count');
+                if (cartElement) {
+                    cartElement.textContent = cartCount;
+                }
+            }, 100);
+        });
+    </script>
+    
     <!-- JavaScript commun  -->
     <script src="../js/common.js"></script>
     <!-- JavaScript  -->

@@ -3,7 +3,9 @@
 // Menu mobile
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');
-    navMenu.classList.toggle('active');
+    if (navMenu) {
+        navMenu.classList.toggle('active');
+    }
 }
 
 // Smooth scroll pour les liens d'ancrage
@@ -22,9 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Fermer le menu mobile quand on clique sur un lien
-    document.querySelectorAll('#navMenu a').forEach(link => {
+    const navLinks = document.querySelectorAll('#navMenu a');
+    navLinks.forEach(link => {
         link.addEventListener('click', () => {
-            document.getElementById('navMenu').classList.remove('active');
+            const navMenu = document.getElementById('navMenu');
+            if (navMenu) {
+                navMenu.classList.remove('active');
+            }
         });
     });
     
@@ -32,20 +38,27 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
     
     // Marquer la page active dans la navigation
-    markActiveNavItem();
-    
-    // Charger header et footer automatiquement (chemins adaptés)
-    loadHTML('header-container', './html/header.html');
-    loadHTML('footer-container', './html/footer.html');
+    // Attendre un peu que le header soit chargé
+    setTimeout(() => {
+        markActiveNavItem();
+    }, 100);
 });
 
 // Fonction pour mettre à jour le compteur de panier
 function updateCartCount() {
     const cartCount = localStorage.getItem('cartCount') || 0;
-    const cartElement = document.getElementById('cart-count');
-    if (cartElement) {
-        cartElement.textContent = cartCount;
-    }
+    const updateCounter = () => {
+        const cartElement = document.getElementById('cart-count');
+        if (cartElement) {
+            cartElement.textContent = cartCount;
+        }
+    };
+    
+    // Essayer maintenant
+    updateCounter();
+    
+    // Et réessayer après le chargement du header
+    setTimeout(updateCounter, 200);
 }
 
 // Fonction pour marquer l'élément de navigation actif
@@ -65,6 +78,8 @@ function markActiveNavItem() {
 }
 
 // Fonction utilitaire pour charger du contenu dynamiquement
+// Cette fonction est gardée pour compatibilité mais n'est plus utilisée
+// car chaque page charge son header/footer directement
 async function loadHTML(elementId, filePath) {
     try {
         const response = await fetch(filePath);
@@ -81,4 +96,3 @@ async function loadHTML(elementId, filePath) {
         console.warn('Erreur lors du chargement de', filePath, ':', error);
     }
 }
-
