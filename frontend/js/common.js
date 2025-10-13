@@ -3,9 +3,7 @@
 // Menu mobile
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');
-    if (navMenu) {
-        navMenu.classList.toggle('active');
-    }
+    navMenu.classList.toggle('active');
 }
 
 // Smooth scroll pour les liens d'ancrage
@@ -24,13 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Fermer le menu mobile quand on clique sur un lien
-    const navLinks = document.querySelectorAll('#navMenu a');
-    navLinks.forEach(link => {
+    document.querySelectorAll('#navMenu a').forEach(link => {
         link.addEventListener('click', () => {
-            const navMenu = document.getElementById('navMenu');
-            if (navMenu) {
-                navMenu.classList.remove('active');
-            }
+            document.getElementById('navMenu').classList.remove('active');
         });
     });
     
@@ -38,27 +32,40 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
     
     // Marquer la page active dans la navigation
-    // Attendre un peu que le header soit chargé
-    setTimeout(() => {
-        markActiveNavItem();
-    }, 100);
+    markActiveNavItem();
+   
+    document.addEventListener('DOMContentLoaded', function() {
+    // ... autres init ...
+    loadHTML('header-container', '/header.html');
+    loadHTML('footer-container', '/footer.html');
+});
+
+async function loadHTML(elementId, filePath) {
+    try {
+        // Force le chemin absolu depuis la racine, robustesse
+        const response = await fetch(filePath.startsWith('/') ? filePath : '/' + filePath);
+        if (!response.ok) {
+            console.warn(`${filePath} non trouvé - vérifiez le chemin`);
+            return;
+        }
+        const html = await response.text();
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = html;
+        }
+    } catch (error) {
+        console.warn('Erreur lors du chargement de', filePath, ':', error);
+    }
+}
 });
 
 // Fonction pour mettre à jour le compteur de panier
 function updateCartCount() {
     const cartCount = localStorage.getItem('cartCount') || 0;
-    const updateCounter = () => {
-        const cartElement = document.getElementById('cart-count');
-        if (cartElement) {
-            cartElement.textContent = cartCount;
-        }
-    };
-    
-    // Essayer maintenant
-    updateCounter();
-    
-    // Et réessayer après le chargement du header
-    setTimeout(updateCounter, 200);
+    const cartElement = document.getElementById('cart-count');
+    if (cartElement) {
+        cartElement.textContent = cartCount;
+    }
 }
 
 // Fonction pour marquer l'élément de navigation actif
@@ -78,8 +85,6 @@ function markActiveNavItem() {
 }
 
 // Fonction utilitaire pour charger du contenu dynamiquement
-// Cette fonction est gardée pour compatibilité mais n'est plus utilisée
-// car chaque page charge son header/footer directement
 async function loadHTML(elementId, filePath) {
     try {
         const response = await fetch(filePath);
@@ -96,3 +101,4 @@ async function loadHTML(elementId, filePath) {
         console.warn('Erreur lors du chargement de', filePath, ':', error);
     }
 }
+
