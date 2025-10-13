@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     markActiveNavItem();
     
     // Charger header et footer automatiquement (chemins adaptés)
-    loadHTML('header-container', '../html/header.html');
-    loadHTML('footer-container', '../html/footer.html');
+    loadHTML('header-container', './html/header.html');
+    loadHTML('footer-container', './html/footer.html');
 });
 
 // Fonction pour mettre à jour le compteur de panier
