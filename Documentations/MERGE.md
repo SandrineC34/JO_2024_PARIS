@@ -36,4 +36,4 @@
 
 ---
 
-**⚠️ Important**: Cette MR ne pourra être mergée que si tous les tests passent et qu'un reviewer approuve.
+**⚠️ Important**: Cette MR ne pourra être mergée que si tous les tests passent et qu'un reviewer approuve.  etst
