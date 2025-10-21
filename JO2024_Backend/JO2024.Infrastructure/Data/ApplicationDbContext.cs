@@ -24,52 +24,113 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Appliquer les configurations
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        // ============================================
+        // Configuration de l'entité Utilisateur
+        // ============================================
+        modelBuilder.Entity<Utilisateur>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Prenom).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Nom).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.MotDePasseHash).IsRequired();
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(50).HasDefaultValue("Utilisateur");
+            entity.Property(e => e.DateCreation).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.EstActif).HasDefaultValue(true);
+        });
 
-        // Seed data initial
-        SeedData(modelBuilder);
-    }
+        // ============================================
+        // Configuration de l'entité Offre
+        // ============================================
+        modelBuilder.Entity<Offre>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Nom).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Prix).HasColumnType("decimal(10,2)").IsRequired();
+            entity.Property(e => e.NombrePersonnes).IsRequired();
+            entity.Property(e => e.Caracteristiques).HasMaxLength(500);
+            entity.Property(e => e.EstActif).HasDefaultValue(true);
+            entity.Property(e => e.DateCreation).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
 
-    private void SeedData(ModelBuilder modelBuilder)
-    {
-        var now = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        // ============================================
+        // Configuration de l'entité Commande
+        // ============================================
+        modelBuilder.Entity<Commande>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Numero).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => e.Numero).IsUnique();
+            entity.Property(e => e.DateAchat).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.MontantHT).HasColumnType("decimal(10,2)").IsRequired();
+            entity.Property(e => e.MontantTVA).HasColumnType("decimal(10,2)").IsRequired();
+            entity.Property(e => e.MontantTotal).HasColumnType("decimal(10,2)").IsRequired();
+            entity.Property(e => e.Statut).IsRequired().HasMaxLength(50).HasDefaultValue("Payée");
+            entity.Property(e => e.MethodePaiement).HasMaxLength(100);
 
-        // Offres initiales
-        modelBuilder.Entity<Offre>().HasData(
-            new Offre
-            {
-                Id = 1,
-                Type = "solo",
-                Nom = "Offre Solo",
-                Description = "Accès pour 1 personne",
-                Prix = 75.00m,
-                NombrePersonnes = 1,
-                EstActif = true,
-                DateCreation = now
-            },
-            new Offre
-            {
-                Id = 2,
-                Type = "duo",
-                Nom = "Offre Duo",
-                Description = "Accès pour 2 personnes - Économie de 20€",
-                Prix = 130.00m,
-                NombrePersonnes = 2,
-                EstActif = true,
-                DateCreation = now
-            },
-            new Offre
-            {
-                Id = 3,
-                Type = "famille",
-                Nom = "Offre Famille",
-                Description = "Accès pour 4 personnes - Économie de 80€",
-                Prix = 220.00m,
-                NombrePersonnes = 4,
-                EstActif = true,
-                DateCreation = now
-            }
-        );
+            // Relations
+            entity.HasOne(e => e.Utilisateur)
+                  .WithMany(u => u.Commandes)
+                  .HasForeignKey(e => e.UtilisateurId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ============================================
+        // Configuration de l'entité CommandeItem
+        // ============================================
+        modelBuilder.Entity<CommandeItem>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Quantite).IsRequired();
+            entity.Property(e => e.PrixUnitaire).HasColumnType("decimal(10,2)").IsRequired();
+            entity.Property(e => e.PrixTotal).HasColumnType("decimal(10,2)").IsRequired();
+            entity.Property(e => e.Sport).HasMaxLength(100);
+
+            // Relations
+            entity.HasOne(e => e.Commande)
+                  .WithMany(c => c.Items)
+                  .HasForeignKey(e => e.CommandeId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Offre)
+                  .WithMany(o => o.CommandeItems)
+                  .HasForeignKey(e => e.OffreId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ============================================
+        // Configuration de l'entité Billet
+        // ============================================
+        modelBuilder.Entity<Billet>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Numero).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => e.Numero).IsUnique();
+            entity.Property(e => e.Titre).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Sport).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Lieu).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.DateEpreuve).IsRequired();
+            entity.Property(e => e.Place).HasMaxLength(50);
+            entity.Property(e => e.Statut).IsRequired().HasMaxLength(50).HasDefaultValue("Actif");
+            entity.Property(e => e.CodeQR).IsRequired();
+            entity.Property(e => e.DateCreation).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // Relations
+            entity.HasOne(e => e.Commande)
+                  .WithMany(c => c.Billets)
+                  .HasForeignKey(e => e.CommandeId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Utilisateur)
+                  .WithMany(u => u.Billets)
+                  .HasForeignKey(e => e.UtilisateurId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Note: Les données de seed sont maintenant gérées dans DbInitializer.cs
+        // pour plus de flexibilité et un meilleur contrôle
     }
 }

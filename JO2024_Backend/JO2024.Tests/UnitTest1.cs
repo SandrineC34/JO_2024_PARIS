@@ -1,10 +1,14 @@
-﻿namespace JO2024.Tests;
+﻿using Xunit; // ✅ Ajout du namespace xUnit
 
-public class UnitTest1
+namespace JO2024.Tests
 {
-    [Fact]
-    public void Test1()
+    public class UnitTest1
     {
-
+        [Fact]
+        public void Test1()
+        {
+            // Exemple basique pour vérifier que les tests fonctionnent
+            Assert.True(true);
+        }
     }
 }

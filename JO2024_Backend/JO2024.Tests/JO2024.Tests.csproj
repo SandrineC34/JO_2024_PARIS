@@ -1,12 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
+    <!-- Cible le framework compatible EF Core 8 et Pomelo 8 -->
     <TargetFramework>net8.0</TargetFramework>
+
+    <!-- Active les usings implicites et les annotations nullables -->
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- Empêche la génération de package NuGet pour le projet de test -->
     <IsPackable>false</IsPackable>
+
+    <!-- Génère un fichier de couverture pour coverlet -->
+    <CollectCoverage>true</CollectCoverage>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Librairies de tests -->
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
@@ -16,6 +26,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+
+    <!-- Outil de couverture de code -->
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -23,7 +35,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Références aux projets applicatifs -->
     <ProjectReference Include="..\JO2024.Core\JO2024.Core.csproj" />
     <ProjectReference Include="..\JO2024.Infrastructure\JO2024.Infrastructure.csproj" />
   </ItemGroup>
+
 </Project>
