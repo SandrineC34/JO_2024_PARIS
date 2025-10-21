@@ -1,0 +1,62 @@
+# render-docker-compose.yml
+# Configuration Docker Compose pour Build CI/CD (PostgreSQL)
+
+services:
+  # ============================================
+  # Backend API (.NET)
+  # ============================================
+  api:
+    build:
+      context: ./backend/JO 2024 PARIS
+      dockerfile: Dockerfile
+    image: jo2024_api_render:latest
+    container_name: jo2024_api_render
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      # PostgreSQL connection string pour Render
+      - ConnectionStrings__DefaultConnection=${DATABASE_URL:-Server=localhost;Database=jeuxolympiques;User=jo2024_user;Password=JO2024Password!}
+      - Jwt__Key=${JWT_KEY:-VotreCleSecreteTresLongueEtSecurisee123456789ABCDEF}
+      - Jwt__Issuer=JO2024.API
+      - Jwt__Audience=JO2024.Client
+      - Jwt__ExpirationMinutes=1440
+    ports:
+      - "5000:80"
+    networks:
+      - jo2024_network
+
+  # ============================================
+  # Frontend (Nginx servant les fichiers statiques)
+  # ============================================
+  frontend:
+    image: nginx:alpine
+    container_name: jo2024_frontend_render
+    restart: always
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend/html:/usr/share/nginx/html:ro
+      - ./frontend/css:/usr/share/nginx/css:ro
+      - ./frontend/js:/usr/share/nginx/js:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - jo2024_network
+    depends_on:
+      - api
+
+networks:
+  jo2024_network:
+    driver: bridge
+
+# ============================================
+# NOTES IMPORTANTES:
+# ============================================
+# 
+# 1. Ce fichier est pour le BUILD en CI/CD uniquement
+# 2. Pas de base de données locale - on utilise celle de Render
+# 3. Le context du backend doit pointer vers le bon dossier
+# 4. Sur Render, utilisez render.yaml ou déployez directement le Dockerfile
+#
+# Pour tester localement avec PostgreSQL:
+# docker compose -f render-docker-compose.yml up

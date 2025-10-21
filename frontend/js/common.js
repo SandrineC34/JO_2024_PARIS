@@ -33,10 +33,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Marquer la page active dans la navigation
     markActiveNavItem();
-    
-    // Charger header et footer automatiquement (chemins adaptés)
+   
+    document.addEventListener('DOMContentLoaded', function() {
+    // ... autres init ...
     loadHTML('header-container', '/header.html');
     loadHTML('footer-container', '/footer.html');
+});
+
+async function loadHTML(elementId, filePath) {
+    try {
+        // Force le chemin absolu depuis la racine, robustesse
+        const response = await fetch(filePath.startsWith('/') ? filePath : '/' + filePath);
+        if (!response.ok) {
+            console.warn(`${filePath} non trouvé - vérifiez le chemin`);
+            return;
+        }
+        const html = await response.text();
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = html;
+        }
+    } catch (error) {
+        console.warn('Erreur lors du chargement de', filePath, ':', error);
+    }
+}
 });
 
 // Fonction pour mettre à jour le compteur de panier
@@ -81,3 +101,4 @@ async function loadHTML(elementId, filePath) {
         console.warn('Erreur lors du chargement de', filePath, ':', error);
     }
 }
+

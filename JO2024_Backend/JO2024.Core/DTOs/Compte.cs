@@ -1,0 +1,34 @@
+// ============================================
+// Compte DTOs
+// JO2024.Core/DTOs/Compte/
+// ============================================
+using System.ComponentModel.DataAnnotations;
+using JO2024.Core.DTOs.Admin;
+using JO2024.Core.DTOs.Commandes;
+using JO2024.Core.DTOs.Billets;
+using JO2024.Core.DTOs.Auth;
+
+namespace JO2024.Core.DTOs.Compte;
+
+public class UpdateProfileDto
+{
+    [Required]
+    [StringLength(100, MinimumLength = 2)]
+    public string Prenom { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(100, MinimumLength = 2)]
+    public string Nom { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ExportDataDto
+{
+    public UtilisateurDto User { get; set; } = null!;
+    public List<CommandeDto> Commandes { get; set; } = new();
+    public List<BilletDto> Billets { get; set; } = new();
+    public DateTime ExportDate { get; set; }
+}

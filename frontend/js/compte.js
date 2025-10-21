@@ -1,180 +1,181 @@
-// compte.js - Gestion de l'espace utilisateur
+// compte.js - Gestion de la page Mon Compte avec appels API
 
-// Configuration API
-const API_BASE = '/api/compte';
+// Configuration de l'API
+const API_BASE_URL = '/api';
+
+// État de l'application
 let currentUser = null;
-let tickets = [];
-let orders = [];
+let userTickets = [];
+let userOrders = [];
 
-// Données de test utilisateur
-const userData = {
-    firstName: 'Jean',
-    lastName: 'Dupont',
-    email: 'jean.dupont@email.com',
-    memberSince: '2024-05-15'
-};
+// ===========================
+// INITIALISATION
+// ===========================
 
-// Initialisation au chargement de la page
-document.addEventListener('DOMContentLoaded', function() {
-    initializeAccount();
-    setupEventListeners();
-    showSection('tickets'); // Section par défaut
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Initialisation de la page Mon Compte');
+    
+    // Vérifier l'authentification
+    await checkAuthentication();
+    
+    // Charger les données initiales
+    await loadUserData();
+    
+    // Configurer la navigation
+    setupNavigation();
+    
+    // Afficher la section par défaut
+    showSection('tickets');
 });
 
-// Initialisation du compte
-async function initializeAccount() {
+// ===========================
+// AUTHENTIFICATION
+// ===========================
+
+async function checkAuthentication() {
     try {
-        await loadUserProfile();
-        await loadTickets();
-        await loadOrders();
-        updateWelcomeMessage();
-    } catch (error) {
-        console.error('Erreur lors de l\'initialisation:', error);
-        showError('Erreur lors du chargement des données');
-    }
-}
-
-// Configuration des écouteurs d'événements
-function setupEventListeners() {
-    // Navigation des sections
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const sectionId = link.getAttribute('data-section');
-            showSection(sectionId);
-        });
-    });
-
-    // Masquer les messages au clic
-    document.querySelectorAll('.message').forEach(msg => {
-        msg.addEventListener('click', () => {
-            msg.style.display = 'none';
-        });
-    });
-}
-
-// Navigation entre les sections
-function showSection(sectionId) {
-    // Masquer toutes les sections
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-    });
-
-    // Retirer la classe active de tous les liens
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-
-    // Afficher la section demandée
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.add('active');
-    }
-    
-    // Activer le lien correspondant
-    const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-    }
-}
-
-// Charger le profil utilisateur
-async function loadUserProfile() {
-    try {
-        const response = await fetch(`${API_BASE}/profil`, {
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
+        const response = await fetch(`${API_BASE_URL}/Auth/current`, {
+            credentials: 'include'
         });
         
-        if (response.ok) {
-            currentUser = await response.json();
-            populateUserForm();
-        } else {
-            // Utiliser les données de test en cas d'erreur
-            currentUser = userData;
-            populateUserForm();
+        if (!response.ok) {
+            // Rediriger vers la page de connexion
+            window.location.href = '/connexion.html';
+            return;
         }
+        
+        currentUser = await response.json();
+        updateWelcomeMessage();
     } catch (error) {
-        console.error('Erreur chargement profil:', error);
-        // Utiliser les données de test
-        currentUser = userData;
-        populateUserForm();
+        console.error('Erreur d\'authentification:', error);
+        showError('Erreur de connexion. Veuillez vous reconnecter.');
+        // Redirection après 2 secondes
+        setTimeout(() => {
+            window.location.href = '/connexion.html';
+        }, 2000);
     }
 }
 
-// Remplir le formulaire avec les données utilisateur
-function populateUserForm() {
-    if (currentUser) {
-        document.getElementById('firstName').value = currentUser.firstName || currentUser.prenom || '';
-        document.getElementById('lastName').value = currentUser.lastName || currentUser.nom || '';
-        document.getElementById('email').value = currentUser.email || '';
-    }
-}
-
-// Mettre à jour le message de bienvenue
 function updateWelcomeMessage() {
-    const welcomeMsg = document.getElementById('welcomeMessage');
-    if (welcomeMsg && currentUser) {
-        const name = currentUser.firstName || currentUser.prenom || 'Utilisateur';
-        welcomeMsg.textContent = `Bienvenue ${name} dans votre espace personnel`;
+    const welcomeElement = document.getElementById('welcomeMessage');
+    if (welcomeElement && currentUser) {
+        welcomeElement.textContent = `Bienvenue ${currentUser.prenom} ${currentUser.nom}`;
+    }
+}
+
+// ===========================
+// CHARGEMENT DES DONNÉES
+// ===========================
+
+async function loadUserData() {
+    try {
+        // Charger en parallèle pour plus de rapidité
+        await Promise.all([
+            loadTickets(),
+            loadOrders(),
+            loadUserProfile()
+        ]);
+    } catch (error) {
+        console.error('Erreur de chargement des données:', error);
+        showError('Impossible de charger vos données');
     }
 }
 
 // Charger les billets
 async function loadTickets() {
+    const loader = document.getElementById('ticketsLoader');
+    const container = document.getElementById('ticketsContainer');
+    
     try {
-        const response = await fetch(`${API_BASE}/billets`, {
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
+        // Afficher le loader
+        if (loader) loader.style.display = 'block';
+        
+        const response = await fetch(`${API_BASE_URL}/Billets`, {
+            credentials: 'include'
         });
         
-        if (response.ok) {
-            tickets = await response.json();
-            displayTickets();
-        } else {
-            // Garder les billets de test du HTML
-            console.log('Utilisation des données de test pour les billets');
+        if (!response.ok) {
+            throw new Error('Erreur lors du chargement des billets');
         }
+        
+        userTickets = await response.json();
+        displayTickets();
     } catch (error) {
-        console.error('Erreur chargement billets:', error);
+        console.error('Erreur:', error);
+        showError('Impossible de charger vos billets');
+        userTickets = [];
+        displayTickets();
+    } finally {
+        // Cacher le loader
+        if (loader) loader.style.display = 'none';
     }
 }
 
-// Afficher les billets
 function displayTickets() {
     const container = document.getElementById('ticketsContainer');
-    if (!container || tickets.length === 0) return;
-
-    container.innerHTML = tickets.map(ticket => `
+    
+    if (!container) return;
+    
+    // Cas : Aucun billet
+    if (userTickets.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <p style="font-size: 1.2em;">📭 Vous n'avez pas encore de billets</p>
+                <p style="margin-top: 10px;">Découvrez nos offres et réservez vos places pour les JO 2024 !</p>
+                <a href="/offres.html" class="btn btn-primary" style="margin-top: 20px; display: inline-block;">
+                    🎫 Découvrir les offres
+                </a>
+            </div>
+        `;
+        return;
+    }
+    
+    // Afficher les billets
+    container.innerHTML = userTickets.map(billet => `
         <div class="ticket-card" onclick="toggleTicketDetails(this)">
             <div class="ticket-header">
-                <div class="ticket-title">${ticket.titre}</div>
-                <div class="ticket-status status-${ticket.statut.toLowerCase()}">${getStatusText(ticket.statut)}</div>
+                <div class="ticket-title">${escapeHtml(billet.titre)}</div>
+                <div class="ticket-status ${getStatusClass(billet.statut)}">
+                    ${escapeHtml(billet.statut)}
+                </div>
             </div>
             <div class="ticket-info">
-                📅 ${formatDate(ticket.dateEvenement)}<br>
-                📍 ${ticket.lieu}<br>
-                🎫 Billet #${ticket.numeroBillet}
+                📅 ${formatDate(billet.dateEpreuve)}<br>
+                📍 ${escapeHtml(billet.lieu)}<br>
+                🎫 Billet #${escapeHtml(billet.numero)}
             </div>
             <div class="ticket-details">
                 <div class="detail-row">
                     <span><strong>Numéro du billet :</strong></span>
-                    <span>${ticket.numeroBillet}</span>
+                    <span>${escapeHtml(billet.numero)}</span>
                 </div>
                 <div class="detail-row">
                     <span><strong>Statut :</strong></span>
-                    <span>${ticket.statutDescription}</span>
+                    <span>${getStatusText(billet)}</span>
                 </div>
                 <div class="detail-row">
                     <span><strong>Place :</strong></span>
-                    <span>${ticket.place}</span>
+                    <span>${escapeHtml(billet.place || 'Non attribuée')}</span>
                 </div>
                 <div class="qr-actions">
-                    ${ticket.peutVoirQR ? `<button class="btn btn-primary btn-small" onclick="viewQRCode(event, ${ticket.id})">👁️ Voir le QR code</button>` : ''}
-                    ${ticket.peutTelecharger ? `<button class="btn btn-secondary btn-small" onclick="downloadPDF(event, ${ticket.id})">📄 Télécharger PDF</button>` : ''}
-                    ${ticket.peutVoirQR ? `<button class="btn btn-outline btn-small" onclick="sendByEmail(event, ${ticket.id})">📧 Envoyer par email</button>` : ''}
+                    ${billet.statut === 'Actif' ? `
+                        <button class="btn btn-primary btn-small" onclick="viewQRCode(event, ${billet.id})">
+                            👁️ Voir le QR code
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="downloadPDF(event, ${billet.id})">
+                            📄 Télécharger PDF
+                        </button>
+                        <button class="btn btn-outline btn-small" onclick="sendByEmail(event, ${billet.id})">
+                            📧 Envoyer par email
+                        </button>
+                    ` : `
+                        <button class="btn btn-secondary btn-small" disabled>
+                            ✅ Billet utilisé
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="downloadPDF(event, ${billet.id})">
+                            📄 Télécharger PDF
+                        </button>
+                    `}
                 </div>
             </div>
         </div>
@@ -183,307 +184,457 @@ function displayTickets() {
 
 // Charger les commandes
 async function loadOrders() {
+    const loader = document.getElementById('ordersLoader');
+    const tbody = document.getElementById('ordersContainer');
+    
     try {
-        const response = await fetch(`${API_BASE}/commandes`, {
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
+        // Afficher le loader
+        if (loader) loader.style.display = 'block';
+        
+        const response = await fetch(`${API_BASE_URL}/Commandes`, {
+            credentials: 'include'
         });
         
-        if (response.ok) {
-            orders = await response.json();
-            displayOrders();
+        if (!response.ok) {
+            throw new Error('Erreur lors du chargement des commandes');
         }
+        
+        userOrders = await response.json();
+        displayOrders();
     } catch (error) {
-        console.error('Erreur chargement commandes:', error);
+        console.error('Erreur:', error);
+        showError('Impossible de charger vos commandes');
+        userOrders = [];
+        displayOrders();
+    } finally {
+        // Cacher le loader
+        if (loader) loader.style.display = 'none';
     }
 }
 
-// Afficher les commandes
 function displayOrders() {
-    const tbody = document.querySelector('.orders-table tbody');
-    if (!tbody || orders.length === 0) return;
-
-    tbody.innerHTML = orders.map(order => `
+    const tbody = document.getElementById('ordersContainer');
+    
+    if (!tbody) return;
+    
+    // Cas : Aucune commande
+    if (userOrders.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                    📭 Aucune commande pour le moment<br>
+                    <small style="margin-top: 10px; display: block;">
+                        Vos commandes apparaîtront ici après votre premier achat
+                    </small>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Afficher les commandes
+    tbody.innerHTML = userOrders.map(commande => `
         <tr>
-            <td><strong>${order.numeroCommande}</strong></td>
-            <td>${formatDate(order.dateCommande)}<br>${formatTime(order.dateCommande)}</td>
-            <td>${order.description}</td>
-            <td><strong>${order.montantTotal}€</strong></td>
-            <td><span class="ticket-status status-${order.statut.toLowerCase()}">${order.statut}</span></td>
+            <td><strong>${escapeHtml(commande.numero)}</strong></td>
+            <td>
+                ${formatDate(commande.dateAchat)}<br>
+                <small>${formatTime(commande.dateAchat)}</small>
+            </td>
+            <td>
+                ${commande.items && commande.items.length > 0 ? 
+                    commande.items.map(item => `
+                        • ${escapeHtml(item.offreNom)}<br>
+                        <small>${item.quantite}x billet${item.quantite > 1 ? 's' : ''} à ${item.prix.toFixed(2)}€</small>
+                    `).join('<br>') 
+                    : 'Détails non disponibles'
+                }
+            </td>
+            <td><strong>${commande.montantTotal.toFixed(2)}€</strong></td>
+            <td>
+                <span class="ticket-status ${getStatusClass(commande.statut)}">
+                    ${escapeHtml(commande.statut)}
+                </span>
+            </td>
         </tr>
     `).join('');
 }
 
-// Basculer les détails d'un billet
-function toggleTicketDetails(ticketCard) {
-    const details = ticketCard.querySelector('.ticket-details');
-    const isExpanded = ticketCard.classList.contains('expanded');
+// Charger le profil utilisateur
+async function loadUserProfile() {
+    const loader = document.getElementById('settingsLoader');
+    const form = document.getElementById('profileForm');
+    
+    try {
+        // Afficher le loader
+        if (loader) loader.style.display = 'block';
+        
+        const response = await fetch(`${API_BASE_URL}/Compte/profile`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors du chargement du profil');
+        }
+        
+        const profile = await response.json();
+        fillProfileForm(profile);
+        
+        // Afficher le formulaire
+        if (form) form.style.display = 'block';
+    } catch (error) {
+        console.error('Erreur:', error);
+        // En cas d'erreur, utiliser les données de currentUser si disponibles
+        if (currentUser) {
+            fillProfileForm({
+                prenom: currentUser.prenom,
+                nom: currentUser.nom,
+                email: currentUser.email || ''
+            });
+            if (form) form.style.display = 'block';
+        }
+    } finally {
+        // Cacher le loader
+        if (loader) loader.style.display = 'none';
+    }
+}
 
-    // Fermer tous les autres billets
-    document.querySelectorAll('.ticket-card').forEach(card => {
-        card.classList.remove('expanded');
-        const cardDetails = card.querySelector('.ticket-details');
-        if (cardDetails) {
-            cardDetails.style.display = 'none';
+function fillProfileForm(profile) {
+    document.getElementById('firstName').value = profile.prenom || '';
+    document.getElementById('lastName').value = profile.nom || '';
+    document.getElementById('email').value = profile.email || '';
+}
+
+// ===========================
+// ACTIONS SUR LES BILLETS
+// ===========================
+
+function toggleTicketDetails(card) {
+    const details = card.querySelector('.ticket-details');
+    const isOpen = details.style.display === 'block';
+    
+    // Fermer tous les détails ouverts
+    document.querySelectorAll('.ticket-details').forEach(d => {
+        d.style.display = 'none';
+    });
+    
+    // Ouvrir celui-ci si il était fermé
+    if (!isOpen) {
+        details.style.display = 'block';
+    }
+}
+
+async function viewQRCode(event, billetId) {
+    event.stopPropagation();
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/Billets/${billetId}`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération du QR code');
+        }
+        
+        const billet = await response.json();
+        showQRCodeModal(billet);
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible d\'afficher le QR code');
+    }
+}
+
+function showQRCodeModal(billet) {
+    // Créer la modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>QR Code - ${escapeHtml(billet.numero)}</h3>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 30px;">
+                <img src="${escapeHtml(billet.codeQR)}" alt="QR Code" style="max-width: 300px; border: 2px solid #004e92;">
+                <p style="margin-top: 20px; color: #666;">
+                    ${escapeHtml(billet.titre)}<br>
+                    📅 ${formatDate(billet.dateEpreuve)}
+                </p>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #999;">
+                    Présentez ce QR code à l'entrée de l'événement
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Fermer en cliquant en dehors
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
         }
     });
-
-    // Basculer le billet actuel
-    if (!isExpanded) {
-        ticketCard.classList.add('expanded');
-        if (details) {
-            details.style.display = 'block';
-        }
-    }
 }
 
-// Voir le QR code d'un billet
-async function viewQRCode(event, ticketId = null) {
+async function downloadPDF(event, billetId) {
     event.stopPropagation();
     
     try {
-        const id = ticketId || extractTicketIdFromCard(event.target);
-        const response = await fetch(`${API_BASE}/billet/${id}/qr`, {
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            showQRCodeModal(data.qrCode, data.numeroBillet);
-        } else {
-            showError('Impossible de générer le QR code');
-        }
-    } catch (error) {
-        console.error('Erreur QR code:', error);
-        showError('Erreur lors de la génération du QR code');
-    }
-}
-
-// Télécharger le PDF d'un billet
-async function downloadPDF(event, ticketId = null) {
-    event.stopPropagation();
-    
-    try {
-        const id = ticketId || extractTicketIdFromCard(event.target);
-        const response = await fetch(`${API_BASE}/billet/${id}/pdf`, {
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
-        });
-        
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `billet-${id}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            showSuccess('PDF téléchargé avec succès');
-        } else {
-            showError('Impossible de télécharger le PDF');
-        }
-    } catch (error) {
-        console.error('Erreur téléchargement PDF:', error);
-        showError('Erreur lors du téléchargement');
-    }
-}
-
-// Envoyer un billet par email
-async function sendByEmail(event, ticketId = null) {
-    event.stopPropagation();
-    
-    try {
-        const id = ticketId || extractTicketIdFromCard(event.target);
-        const response = await fetch(`${API_BASE}/billet/${id}/email`, {
+        const response = await fetch(`${API_BASE_URL}/Billets/${billetId}/download`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`,
-                'Content-Type': 'application/json'
-            }
+            credentials: 'include'
         });
         
-        if (response.ok) {
-            const result = await response.json();
-            showSuccess(result.message);
-        } else {
-            showError('Impossible d\'envoyer l\'email');
+        if (!response.ok) {
+            throw new Error('Erreur lors du téléchargement');
         }
+        
+        const result = await response.json();
+        showSuccess('PDF généré avec succès ! Téléchargement en cours...');
+        
+        // TODO: Implémenter le téléchargement réel du PDF
+        console.log('Download URL:', result.downloadUrl);
     } catch (error) {
-        console.error('Erreur envoi email:', error);
-        showError('Erreur lors de l\'envoi par email');
+        console.error('Erreur:', error);
+        showError('Impossible de télécharger le PDF');
     }
 }
 
-// Sauvegarder les paramètres utilisateur
+async function sendByEmail(event, billetId) {
+    event.stopPropagation();
+    
+    if (!confirm('Voulez-vous recevoir ce billet par email ?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/Billets/${billetId}/email`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors de l\'envoi');
+        }
+        
+        const result = await response.json();
+        showSuccess(result.message);
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible d\'envoyer l\'email');
+    }
+}
+
+// ===========================
+// GESTION DU PROFIL
+// ===========================
+
 async function saveSettings(event) {
     event.preventDefault();
     
-    const formData = new FormData(event.target);
-    const userData = {
-        prenom: formData.get('firstName'),
-        nom: formData.get('lastName'),
-        email: formData.get('email')
+    const formData = {
+        prenom: document.getElementById('firstName').value,
+        nom: document.getElementById('lastName').value,
+        email: document.getElementById('email').value
     };
     
     try {
-        const response = await fetch(`${API_BASE}/profil`, {
+        const response = await fetch(`${API_BASE_URL}/Compte/profile`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${getAuthToken()}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(userData)
+            credentials: 'include',
+            body: JSON.stringify(formData)
         });
         
-        if (response.ok) {
-            showSuccess('Informations mises à jour avec succès');
-            currentUser = { ...currentUser, ...userData };
-            updateWelcomeMessage();
-        } else {
-            const error = await response.json();
-            showError(error.message || 'Erreur lors de la mise à jour');
+        if (!response.ok) {
+            throw new Error('Erreur lors de la mise à jour');
         }
+        
+        showSuccess('✅ Informations mises à jour avec succès !');
+        
+        // Recharger les données utilisateur
+        await checkAuthentication();
     } catch (error) {
-        console.error('Erreur sauvegarde:', error);
-        showError('Erreur lors de la sauvegarde');
+        console.error('Erreur:', error);
+        showError('Impossible de mettre à jour vos informations');
     }
 }
 
-// Changer le mot de passe
 async function changePassword(event) {
     event.preventDefault();
     
-    const formData = new FormData(event.target);
-    const newPassword = formData.get('newPassword');
-    const confirmPassword = formData.get('confirmPassword');
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
     
+    // Validation
     if (newPassword !== confirmPassword) {
         showError('Les mots de passe ne correspondent pas');
         return;
     }
     
-    if (!isValidPassword(newPassword)) {
+    if (!validatePassword(newPassword)) {
         showError('Le mot de passe ne respecte pas les critères de sécurité');
         return;
     }
     
-    const passwordData = {
-        motDePasseActuel: formData.get('currentPassword'),
-        nouveauMotDePasse: newPassword,
-        confirmerMotDePasse: confirmPassword
-    };
-    
     try {
-        const response = await fetch(`${API_BASE}/motdepasse`, {
-            method: 'PUT',
+        const response = await fetch(`${API_BASE_URL}/Compte/change-password`, {
+            method: 'POST',
             headers: {
-                'Authorization': `Bearer ${getAuthToken()}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(passwordData)
+            credentials: 'include',
+            body: JSON.stringify({
+                currentPassword,
+                newPassword
+            })
         });
         
-        if (response.ok) {
-            showSuccess('Mot de passe changé avec succès');
-            event.target.reset();
-        } else {
+        if (!response.ok) {
             const error = await response.json();
-            showError(error.message || 'Erreur lors du changement de mot de passe');
+            throw new Error(error.message || 'Erreur lors du changement de mot de passe');
         }
+        
+        showSuccess('✅ Mot de passe modifié avec succès !');
+        
+        // Réinitialiser le formulaire
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
     } catch (error) {
-        console.error('Erreur changement mot de passe:', error);
-        showError('Erreur lors du changement de mot de passe');
+        console.error('Erreur:', error);
+        showError(error.message);
     }
 }
 
-// Télécharger les données utilisateur (RGPD)
+function validatePassword(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*]/.test(password);
+    
+    return password.length >= minLength && 
+           hasUpperCase && 
+           hasLowerCase && 
+           hasNumbers && 
+           hasSpecialChar;
+}
+
 async function downloadUserData() {
     try {
-        const response = await fetch(`${API_BASE}/donnees`, {
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
+        const response = await fetch(`${API_BASE_URL}/Compte/export-data`, {
+            credentials: 'include'
         });
         
-        if (response.ok) {
-            const data = await response.json();
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'mes-donnees-jo2024.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            showSuccess('Données téléchargées avec succès');
-        } else {
-            showError('Impossible de télécharger les données');
+        if (!response.ok) {
+            throw new Error('Erreur lors de l\'export');
         }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mes-donnees-jo2024-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showSuccess('Vos données ont été téléchargées');
     } catch (error) {
-        console.error('Erreur téléchargement données:', error);
-        showError('Erreur lors du téléchargement des données');
+        console.error('Erreur:', error);
+        showError('Impossible de télécharger vos données');
     }
 }
 
-// Confirmer la suppression du compte
 function confirmDeleteAccount() {
-    if (confirm('⚠️ ATTENTION ⚠️\n\nVoulez-vous vraiment supprimer définitivement votre compte ?\n\nCette action est irréversible et supprimera :\n- Toutes vos informations personnelles\n- Votre historique de commandes\n- Tous vos billets\n\nTapez "SUPPRIMER" pour confirmer :')) {
-        const confirmation = prompt('Pour confirmer, tapez "SUPPRIMER" :');
-        if (confirmation === 'SUPPRIMER') {
+    const confirmed = confirm(
+        '⚠️ ATTENTION ⚠️\n\n' +
+        'Êtes-vous sûr de vouloir supprimer votre compte ?\n\n' +
+        'Cette action est IRRÉVERSIBLE et entraînera :\n' +
+        '• La suppression de toutes vos données personnelles\n' +
+        '• La perte de tous vos billets\n' +
+        '• L\'annulation de toutes vos commandes'
+    );
+    
+    if (confirmed) {
+        const finalConfirm = prompt('Tapez "SUPPRIMER" en majuscules pour confirmer :');
+        if (finalConfirm === 'SUPPRIMER') {
             deleteAccount();
         }
     }
 }
 
-// Supprimer le compte
 async function deleteAccount() {
     try {
-        const response = await fetch(`${API_BASE}`, {
+        const response = await fetch(`${API_BASE_URL}/Compte/delete`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
+            credentials: 'include'
         });
         
-        if (response.ok) {
-            alert('Compte supprimé avec succès. Vous allez être déconnecté.');
-            logout();
-        } else {
-            const error = await response.json();
-            showError(error.message || 'Erreur lors de la suppression du compte');
+        if (!response.ok) {
+            throw new Error('Erreur lors de la suppression');
         }
+        
+        alert('Votre compte a été supprimé. Vous allez être déconnecté.');
+        window.location.href = '/';
     } catch (error) {
-        console.error('Erreur suppression compte:', error);
-        showError('Erreur lors de la suppression du compte');
+        console.error('Erreur:', error);
+        showError('Impossible de supprimer votre compte');
     }
 }
 
-// Fonctions utilitaires
-function getAuthToken() {
-    return localStorage.getItem('authToken') || 'demo-token';
+// ===========================
+// NAVIGATION
+// ===========================
+
+function setupNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.dataset.section;
+            showSection(section);
+            
+            // Mettre à jour les liens actifs
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
 }
 
-function extractTicketIdFromCard(element) {
-    const card = element.closest('.ticket-card');
-    const numberElement = card.querySelector('.ticket-info');
-    const text = numberElement.textContent;
-    const match = text.match(/#([^\\s]+)/);
-    return match ? match[1] : '1';
+function showSection(sectionName) {
+    // Masquer toutes les sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Afficher la section demandée
+    const section = document.getElementById(sectionName);
+    if (section) {
+        section.classList.add('active');
+    }
 }
+
+// ===========================
+// UTILITAIRES
+// ===========================
 
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 
@@ -495,63 +646,56 @@ function formatTime(dateString) {
     });
 }
 
-function getStatusText(status) {
+function getStatusClass(statut) {
     const statusMap = {
-        'Actif': 'Actif',
-        'Scanne': 'Scanné',
-        'Expire': 'Expiré',
-        'Annule': 'Annulé'
+        'Actif': 'status-active',
+        'Scanné': 'status-scanned',
+        'Payée': 'status-active',
+        'Utilisée': 'status-scanned',
+        'Annulée': 'status-cancelled'
     };
-    return statusMap[status] || status;
+    return statusMap[statut] || 'status-active';
 }
 
-function isValidPassword(password) {
-    const minLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasDigit = /\d/.test(password);
-    const hasSpecial = /[!@#$%^&*]/.test(password);
-    
-    return minLength && hasUpper && hasLower && hasDigit && hasSpecial;
+function getStatusText(billet) {
+    if (billet.statut === 'Actif') {
+        return 'Actif - Prêt à être utilisé';
+    } else if (billet.statut === 'Scanné' && billet.dateScan) {
+        return `Scanné le ${formatDate(billet.dateScan)}`;
+    }
+    return escapeHtml(billet.statut);
 }
 
 function showSuccess(message) {
-    const successEl = document.getElementById('successMessage');
-    if (successEl) {
-        successEl.textContent = `✅ ${message}`;
-        successEl.style.display = 'block';
+    const successDiv = document.getElementById('successMessage');
+    if (successDiv) {
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        
+        // Auto-masquer après 5 secondes
         setTimeout(() => {
-            successEl.style.display = 'none';
+            successDiv.style.display = 'none';
         }, 5000);
     }
 }
 
 function showError(message) {
-    const errorEl = document.getElementById('errorMessage');
-    if (errorEl) {
-        errorEl.textContent = `❌ ${message}`;
-        errorEl.style.display = 'block';
+    const errorDiv = document.getElementById('errorMessage');
+    if (errorDiv) {
+        errorDiv.textContent = '❌ ' + message;
+        errorDiv.style.display = 'block';
+        
+        // Auto-masquer après 5 secondes
         setTimeout(() => {
-            errorEl.style.display = 'none';
+            errorDiv.style.display = 'none';
         }, 5000);
     }
 }
 
-function showQRCodeModal(qrCode, ticketNumber) {
-    // Créer une modal pour afficher le QR code
-    const modal = document.createElement('div');
-    modal.className = 'qr-modal';
-    modal.innerHTML = `
-        <div class="qr-modal-content">
-            <h3>QR Code - Billet ${ticketNumber}</h3>
-            <div class="qr-code-display">${qrCode}</div>
-            <button onclick="this.closest('.qr-modal').remove()">Fermer</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function logout() {
-    localStorage.removeItem('authToken');
-    window.location.href = '/login.html';
+// Protection XSS : échapper les caractères HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }

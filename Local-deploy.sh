@@ -1,4 +1,5 @@
 #!/bin/bash
+<<<<<<< HEAD
 # Déploiement local du projet JeuxOlympiques avec Docker Desktop
 
 set -e  # Stoppe le script en cas d'erreur
@@ -26,3 +27,22 @@ docker run -d \
 # Vérification du statut
 echo "Application déployée localement sur http://localhost:8080"
 docker ps | grep $CONTAINER_NAME
+=======
+
+# Nettoyer complètement
+docker-compose -f desktop-docker-compose.yml down -v
+docker system prune -af
+docker volume prune -f
+
+# Rebuild from scratch
+docker-compose -f desktop-docker-compose.yml build --no-cache
+
+# Démarrer
+docker-compose -f desktop-docker-compose.yml up -d
+
+# Docker visualisation
+docker ps
+
+# Voir les logs
+# docker-compose -f desktop-docker-compose.yml logs -f api
+>>>>>>> dev

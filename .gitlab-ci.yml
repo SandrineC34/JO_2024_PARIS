@@ -1,0 +1,259 @@
+# Pipeline CI/CD pour JO 2024 - GitLab vers Render
+# Version: 2.0 - Déploiement Render
+
+# Définition des stages
+stages:
+  - test
+  - build
+  - deploy
+
+# Variables globales
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  MYSQL_ROOT_PASSWORD: "RootPassword123!"
+  MYSQL_DATABASE: "jeuxolympiques"
+  MYSQL_USER: "jo_user"
+  MYSQL_PASSWORD: "JO2024Password!"
+  RENDER_SERVICE_ID: "srv-d37v3b6mcj7s73fubkq0"
+  RENDER_DATABASE_ID: "dpg-d3cnj7qdbo4c73ebltmg-a"
+
+# ======================================
+# STAGE 1: TESTS UNITAIRES
+# ======================================
+
+test:unit:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  services:
+    - mysql:8.0
+  variables:
+    MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+    MYSQL_DATABASE: $MYSQL_DATABASE
+    MYSQL_USER: $MYSQL_USER
+    MYSQL_PASSWORD: $MYSQL_PASSWORD
+  before_script:
+    - cd backend/"JO 2024 PARIS"
+    - echo "Restauration des dépendances..."
+    - dotnet restore
+  script:
+    - echo "Exécution des tests unitaires..."
+    - dotnet test JO2024API.Tests/JO2024API.Tests.csproj 
+        --configuration Release 
+        --logger "trx;LogFileName=test_results.trx" 
+        --logger "console;verbosity=detailed"
+        --collect:"XPlat Code Coverage"
+        /p:CollectCoverage=true 
+        /p:CoverletOutputFormat=cobertura
+    - echo "Tests terminés avec succès"
+  artifacts:
+    when: always
+    paths:
+      - backend/"JO 2024 PARIS"/JO2024API.Tests/TestResults/
+      - backend/"JO 2024 PARIS"/JO2024API.Tests/coverage.cobertura.xml
+    reports:
+      junit:
+        - backend/"JO 2024 PARIS"/JO2024API.Tests/TestResults/*.trx
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/"JO 2024 PARIS"/JO2024API.Tests/coverage.cobertura.xml
+    expire_in: 30 days
+  coverage: '/Total\s+\|\s+(\d+\.?\d*)%/'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+
+# ======================================
+# STAGE 2: BUILD DOCKER (Branche DEV)
+# ======================================
+
+build:dev:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker info
+    - echo "Build de l'environnement de développement..."
+  script:
+    - echo "Construction des images Docker..."
+    - docker-compose -f desktop-docker-compose.yml build
+    - echo "Build terminé avec succès"
+  only:
+    - dev
+  dependencies:
+    - test:unit
+
+# ======================================
+# STAGE 3: BUILD DOCKER (Branche MAIN)
+# ======================================
+
+build:production:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker info
+    - echo "Build de l'environnement de production..."
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - echo "Construction des images Docker pour production..."
+    - docker-compose -f render-docker-compose.yml build
+    - echo "Tag des images..."
+    - docker tag jo2024_api_render:latest $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA
+    - docker tag jo2024_api_render:latest $CI_REGISTRY_IMAGE/api:latest
+    - docker tag jo2024_frontend_render:latest $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA
+    - docker tag jo2024_frontend_render:latest $CI_REGISTRY_IMAGE/frontend:latest
+    - echo "Push des images vers le registry..."
+    - docker push $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE/api:latest
+    - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE/frontend:latest
+    - echo "Build et push production terminés"
+  only:
+    - main
+  dependencies:
+    - test:unit
+
+# ======================================
+# STAGE 4: DEPLOY VERS RENDER (MANUEL)
+# ======================================
+
+deploy:render:
+  stage: deploy
+  image: curlimages/curl:latest
+  before_script:
+    - echo "Préparation du déploiement vers Render..."
+  script:
+    - |
+      echo "Déclenchement du déploiement Render pour le service $RENDER_SERVICE_ID..."
+      
+      # Appel à l'API Render pour déclencher un déploiement
+      response=$(curl -X POST \
+        "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+        -H "Accept: application/json" \
+        -H "Authorization: Bearer $RENDER_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "clearCache": "do_not_clear"
+        }' \
+        -w "\n%{http_code}" \
+        -s)
+      
+      http_code=$(echo "$response" | tail -n1)
+      body=$(echo "$response" | sed '$d')
+      
+      echo "HTTP Status: $http_code"
+      echo "Response: $body"
+      
+      if [ "$http_code" -eq 201 ] || [ "$http_code" -eq 200 ]; then
+        echo "Déploiement déclenché avec succès sur Render!"
+        echo "Vérifiez le statut sur: https://dashboard.render.com/web/$RENDER_SERVICE_ID"
+      else
+        echo "Erreur lors du déploiement: HTTP $http_code"
+        exit 1
+      fi
+  environment:
+    name: production-render
+    url: https://jo2024-api.onrender.com
+  only:
+    - main
+  when: manual  # Déploiement manuel pour plus de sécurité
+  dependencies:
+    - build:production
+
+# ======================================
+# STAGE 4 BIS: DEPLOY AUTOMATIQUE (Optionnel)
+# Décommentez pour activer le déploiement automatique
+# ======================================
+
+# deploy:render:auto:
+#   stage: deploy
+#   image: curlimages/curl:latest
+#   before_script:
+#     - echo "Déploiement automatique vers Render..."
+#   script:
+#     - |
+#       echo "Appel du webhook Render..."
+#       
+#       # Utilisation du Deploy Hook de Render (plus simple)
+#       response=$(curl -X POST \
+#         "$RENDER_DEPLOY_HOOK_URL" \
+#         -w "\n%{http_code}" \
+#         -s)
+#       
+#       http_code=$(echo "$response" | tail -n1)
+#       
+#       echo "HTTP Status: $http_code"
+#       
+#       if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
+#         echo "Déploiement déclenché automatiquement!"
+#       else
+#         echo "Impossible de déclencher le déploiement automatique"
+#         exit 1
+#       fi
+#   environment:
+#     name: production-render
+#     url: https://jo2024-api.onrender.com
+#   only:
+#     - main
+#   when: on_success
+#   dependencies:
+#     - build:production
+#   allow_failure: true
+
+# ======================================
+# JOB OPTIONNEL: ANALYSE DE CODE
+# ======================================
+
+code:quality:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  before_script:
+    - cd backend/"JO 2024 PARIS"
+    - dotnet restore
+  script:
+    - echo "Analyse de qualité du code..."
+    - dotnet format --verify-no-changes --verbosity diagnostic
+  allow_failure: true
+  only:
+    - dev
+    - merge_requests
+
+# ======================================
+# JOB OPTIONNEL: SÉCURITÉ
+# ======================================
+
+security:scan:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  before_script:
+    - cd backend/"JO 2024 PARIS"
+  script:
+    - echo "Scan de sécurité des dépendances..."
+    - dotnet list package --vulnerable --include-transitive
+  allow_failure: true
+  only:
+    - dev
+    - merge_requests
+
+# ======================================
+# JOB OPTIONNEL: VÉRIFICATION BASE DE DONNÉES RENDER
+# ======================================
+
+check:database:
+  stage: test
+  image: postgres:15
+  script:
+    - echo "Vérification de la connexion à la base de données Render..."
+    - |
+      if [ -n "$DATABASE_URL" ]; then
+        psql "$DATABASE_URL" -c "SELECT version();"
+        echo "Connexion à la base de données réussie"
+      else
+        echo "DATABASE_URL non définie"
+        exit 0
+      fi
+  only:
+    - main
+  allow_failure: true
