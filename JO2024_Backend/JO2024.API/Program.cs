@@ -17,15 +17,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuration des services
 // ============================================
 
-// Configuration de la base de données MySQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Configuration de la base de données PostgreSQL
+// Priorité : DATABASE_URL (Render) > ConnectionStrings:DefaultConnection (local)
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Si DATABASE_URL est au format postgres://, convertir pour Npgsql
+if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
+{
+    // Convertir postgres://user:pass@host:port/db en format Npgsql
+    var uri = new Uri(connectionString);
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    // doker desktop options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
-    options.UseNpgsql(connectionString) //render
-   
-
+    options.UseNpgsql(connectionString)
 );
-
 
 // Configuration CORS
 builder.Services.AddCors(options =>
