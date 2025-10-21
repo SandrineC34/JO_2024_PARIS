@@ -51,7 +51,7 @@
 
 ### Étape 2 : Adapter le code pour PostgreSQL
 
-Modifiez votre `JeuxOlympiques.csproj` :
+Modifiez votre `JO2024.api s.csproj` :
 
 ```xml
 <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />

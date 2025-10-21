@@ -20,7 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuration de la base de données MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
+    // doker desktop options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
+    options.UseNpgsql(connectionString) //render
+   
+
 );
 
 
