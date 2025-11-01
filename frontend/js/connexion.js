@@ -69,6 +69,41 @@ function showForgotPassword() {
     resetForms();
 }
 
+// === GESTION NEWSLETTER ===
+document.addEventListener("DOMContentLoaded", () => {
+    const newsletterConsent = document.getElementById("newsletterConsent");
+    const newsletterCategories = document.getElementById("newsletterCategories");
+
+    if (newsletterConsent && newsletterCategories) {
+        // 🔹 Afficher directement la section newsletter au chargement
+        newsletterConsent.checked = true;
+        newsletterCategories.style.display = "block";
+
+        // 🔹 Conserver le comportement dynamique au clic
+        newsletterConsent.addEventListener("change", () => {
+            newsletterCategories.style.display = newsletterConsent.checked ? "block" : "none";
+        });
+    }
+});
+
+// === SIMULATION D’ACTIONS ===
+function handleLogin(event) {
+    event.preventDefault();
+    alert("Connexion simulée !");
+}
+
+function handleRegister(event) {
+    event.preventDefault();
+    alert("Inscription simulée !");
+}
+
+function handleForgotPassword(event) {
+    event.preventDefault();
+    alert("Lien de réinitialisation simulé !");
+}
+
+
+
 // Réinitialiser les formulaires
 function resetForms() {
     // Réinitialiser tous les formulaires

@@ -1,126 +1,116 @@
-// ============================================
-// Program.cs
-// JO2024_backend/Program.cs
-// ============================================
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using JO2024.Infrastructure.Data;
 using JO2024.Core.Interfaces;
 using JO2024.Core.Services;
 using JO2024.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// ============================================
-// Configuration des services
-// ============================================
-
-// Configuration de la base de données PostgreSQL
-// Priorité : DATABASE_URL (Render) > ConnectionStrings:DefaultConnection (local)
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Si DATABASE_URL est au format postgres://, convertir pour Npgsql
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
+namespace JO2024.API
 {
-    // Convertir postgres://user:pass@host:port/db en format Npgsql
-    var uri = new Uri(connectionString);
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
-}
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString)
-);
-
-// Configuration CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
+    public class Program
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
-
-// Enregistrement des repositories
-builder.Services.AddScoped<IOffreRepository, OffreRepository>();
-builder.Services.AddScoped<IUtilisateurRepository, UtilisateurRepository>();
-builder.Services.AddScoped<ICommandeRepository, CommandeRepository>();
-builder.Services.AddScoped<IBilletRepository, BilletRepository>();
-
-// Enregistrement des services
-builder.Services.AddScoped<IOffreService, OffreService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IQRCodeService, QRCodeService>();
-builder.Services.AddScoped<ICommandeService, CommandeService>();
-builder.Services.AddScoped<IBilletService, BilletService>();
-
-// Configuration JWT
-var jwtKey = builder.Configuration["Jwt:Key"];
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+        public static void Main(string[] args)
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
-    });
+            var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+            // ============================================================
+            // 🔧 Configuration des Services
+            // ============================================================
 
-var app = builder.Build();
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
-// ============================================
-// INITIALISATION DE LA BASE DE DONNÉES
-// ============================================
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        
-        logger.LogInformation("Démarrage de l'initialisation de la base de données...");
-        await DbInitializer.Initialize(context, logger);
-        logger.LogInformation("Initialisation de la base de données terminée avec succès");
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Erreur lors de l'initialisation de la base de données");
-        throw; // Arrête l'application si l'init échoue
+            // ============================================================
+            // 💾 CONFIGURATION BASE DE DONNÉES
+            // ============================================================
+
+            var env = builder.Environment.EnvironmentName.ToLower();
+
+            // === 🐋 SECTION DOCKER LOCAL ===
+            // 👉 Active si tu déploies via Docker Desktop (MySQL)
+            // <docker>
+            var connectionStringDocker = builder.Configuration.GetConnectionString("MySQLConnection")
+                ?? "server=mysql;port=3306;database=jo2024db;user=root;password=example;";
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseMySql(connectionStringDocker, ServerVersion.AutoDetect(connectionStringDocker)));
+            // </docker>
+
+            // === ☁️ SECTION RENDER DEPLOYMENT ===
+            // 👉 Décommente si tu déploies sur Render (PostgreSQL)
+            /*
+            // <render>
+            var connectionStringRender = Environment.GetEnvironmentVariable("DATABASE_URL");
+            if (!string.IsNullOrEmpty(connectionStringRender))
+            {
+                var databaseUri = new Uri(connectionStringRender);
+                var userInfo = databaseUri.UserInfo.Split(':');
+                var connStr = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true;";
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseNpgsql(connStr));
+            }
+            // </render>
+            */
+
+            // ============================================================
+            // 🔐 AUTHENTIFICATION JWT
+            // ============================================================
+            var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "MaCléParDéfautTrèsSécurisée123!");
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            // ============================================================
+            // 🧩 DEPENDENCY INJECTION
+            // ============================================================
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
+            var app = builder.Build();
+
+            // ============================================================
+            // 🚀 PIPELINE HTTP
+            // ============================================================
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
+
+            // ============================================================
+            // ⚙️ MIGRATIONS AUTOMATIQUES AU DÉMARRAGE
+            // ============================================================
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Database.Migrate();
+            }
+
+            app.Run();
+        }
     }
 }
-
-// ============================================
-// Configuration du pipeline HTTP
-// ============================================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseCors("AllowAll");
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-app.Logger.LogInformation("API JO2024 démarrée sur {Urls}", app.Urls);
-
-app.Run();

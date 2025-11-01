@@ -1,7 +1,6 @@
 {
   "format": 1,
   "restore": {
-<<<<<<<< HEAD:obj/JO2024API.csproj.nuget.dgspec.json
     "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024API.csproj": {}
   },
   "projects": {
@@ -11,19 +10,8 @@
         "projectUniqueName": "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024API.csproj",
         "projectName": "JO2024API",
         "projectPath": "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024API.csproj",
-========
-    "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024_Backend\\JO2024.Core\\JO2024.Core.csproj": {}
-  },
-  "projects": {
-    "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024_Backend\\JO2024.Core\\JO2024.Core.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024_Backend\\JO2024.Core\\JO2024.Core.csproj",
-        "projectName": "JO2024.Core",
-        "projectPath": "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024_Backend\\JO2024.Core\\JO2024.Core.csproj",
->>>>>>>> dev:JO2024_Backend/JO2024.Core/obj/JO2024.Core.csproj.nuget.dgspec.json
         "packagesPath": "C:\\Users\\Sandrine C\\.nuget\\packages\\",
-        "outputPath": "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\JO2024_Backend\\JO2024.Core\\obj\\",
+        "outputPath": "E:\\Formation\\Studi\\Evaluation\\Examen Bloc certifiant 3\\Projet\\JO_2024_PARIS\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -34,15 +22,15 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net8.0"
+          "net9.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
+          "net9.0": {
+            "targetAlias": "net9.0",
             "projectReferences": {}
           }
         },
@@ -59,19 +47,13 @@
         "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
-<<<<<<<< HEAD:obj/JO2024API.csproj.nuget.dgspec.json
         "net9.0": {
           "targetAlias": "net9.0",
-========
-        "net8.0": {
-          "targetAlias": "net8.0",
->>>>>>>> dev:JO2024_Backend/JO2024.Core/obj/JO2024.Core.csproj.nuget.dgspec.json
           "dependencies": {
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
             },
-<<<<<<<< HEAD:obj/JO2024API.csproj.nuget.dgspec.json
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[9.0.9, )"
@@ -113,31 +95,6 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[3.1.5, )"
-========
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.0, )"
-            },
-            "Microsoft.Extensions.Configuration.Abstractions": {
-              "target": "Package",
-              "version": "[8.0.0, )"
-            },
-            "Microsoft.IdentityModel.Tokens": {
-              "target": "Package",
-              "version": "[8.2.1, )"
-            },
-            "QRCoder": {
-              "target": "Package",
-              "version": "[1.6.0, )"
-            },
-            "System.ComponentModel.Annotations": {
-              "target": "Package",
-              "version": "[5.0.0, )"
-            },
-            "System.IdentityModel.Tokens.Jwt": {
-              "target": "Package",
-              "version": "[8.2.1, )"
->>>>>>>> dev:JO2024_Backend/JO2024.Core/obj/JO2024.Core.csproj.nuget.dgspec.json
             }
           },
           "imports": [
@@ -152,6 +109,9 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }

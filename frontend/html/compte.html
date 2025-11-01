@@ -102,8 +102,22 @@
 
                         <!-- Section Paramètres -->
                         <section id="settings" class="section">
-                            <h2>⚙️ Paramètres du compte</h2>
+                            <h2>Paramètres du compte</h2>
                             <p>Gérez vos informations personnelles et votre sécurité</p>
+                            <h3>Préférences Newsletter</h3>
+                            <form id="newsletterForm" onsubmit="saveNewsletterPreferences(event)">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="newsletterAbonne" name="newsletterAbonne">
+                                    Recevoir la newsletter hebdomadaire (lundi 8h)
+                                </label>
+                                
+                                <div id="categoriesSection">
+                                    <h4>Catégories d'épreuves :</h4>
+                                    <!-- Checkboxes pour chaque catégorie -->
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                            </form>
 
                             <!-- Loader -->
                             <div id="settingsLoader" class="loader">
