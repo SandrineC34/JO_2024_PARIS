@@ -1,5 +1,5 @@
 // ============================================
-// CompteController.cs
+// CompteController.cs - Version mise à jour
 // ============================================
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +20,7 @@ public class CompteController : ControllerBase
     private readonly ICommandeService _commandeService;
     private readonly IBilletService _billetService;
     private readonly IUtilisateurRepository _utilisateurRepository;
+    private readonly IEmailService _emailService; // ⭐ NOUVEAU
     private readonly ILogger<CompteController> _logger;
 
     public CompteController(
@@ -27,12 +28,14 @@ public class CompteController : ControllerBase
         ICommandeService commandeService,
         IBilletService billetService,
         IUtilisateurRepository utilisateurRepository,
+        IEmailService emailService, // ⭐ NOUVEAU
         ILogger<CompteController> logger)
     {
         _authService = authService;
         _commandeService = commandeService;
         _billetService = billetService;
         _utilisateurRepository = utilisateurRepository;
+        _emailService = emailService; // ⭐ NOUVEAU
         _logger = logger;
     }
 
@@ -115,8 +118,7 @@ public class CompteController : ControllerBase
     [HttpGet("export-data")]
     public async Task<IActionResult> ExportData()
     {
-        try
-        {
+        try {
             var userId = GetUserIdFromClaims();
             var user = await _authService.GetCurrentUserAsync(userId);
             var commandes = await _commandeService.GetCommandesByUtilisateurAsync(userId);
@@ -145,6 +147,9 @@ public class CompteController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// ⭐ MODIFIÉ: Suppression de compte avec envoi d'email de confirmation
+    /// </summary>
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteAccount()
     {
@@ -156,9 +161,21 @@ public class CompteController : ControllerBase
             if (utilisateur == null)
                 return NotFound(new { message = "Utilisateur non trouvé" });
 
-            // Désactiver le compte au lieu de le supprimer (soft delete)
+            // Désactiver le compte (soft delete)
             utilisateur.EstActif = false;
             await _utilisateurRepository.UpdateAsync(utilisateur);
+            
+            // ⭐ NOUVEAU: Envoyer l'email de confirmation de suppression
+            try
+            {
+                await _emailService.SendAccountDeletionConfirmationAsync(userId);
+                _logger.LogInformation("Email de confirmation de suppression envoyé pour l'utilisateur {UserId}", userId);
+            }
+            catch (Exception emailEx)
+            {
+                _logger.LogWarning(emailEx, "Impossible d'envoyer l'email de confirmation de suppression pour {UserId}", userId);
+                // Ne pas échouer la suppression si l'email ne part pas
+            }
             
             return Ok(new { 
                 success = true, 

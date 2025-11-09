@@ -1,6 +1,3 @@
-// ============================================
-// Billet.cs
-// ============================================
 using System.ComponentModel.DataAnnotations;
 
 namespace JO2024.Core.Entities;

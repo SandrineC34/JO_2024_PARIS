@@ -1,5 +1,5 @@
 // ============================================
-// ApplicationDbContext.cs
+// ApplicationDbContext.cs - Version mise à jour
 // JO2024.Infrastructure/Data/ApplicationDbContext.cs
 // ============================================
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +19,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<Commande> Commandes { get; set; }
     public DbSet<CommandeItem> CommandeItems { get; set; }
     public DbSet<Billet> Billets { get; set; }
+    
+    // ajout Tables Newsletter
+   // public DbSet<NewsletterSubscription> NewsletterSubscriptions { get; set; }
+   // public DbSet<NewsletterSubscriptionHistory> NewsletterSubscriptionHistory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

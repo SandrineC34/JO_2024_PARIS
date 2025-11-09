@@ -1,12 +1,11 @@
-// compte.js - Gestion de la page Mon Compte avec appels API
+// compte.js - Version mise à jour avec gestion Newsletter
 
-// Configuration de l'API
 const API_BASE_URL = '/api';
 
-// État de l'application
 let currentUser = null;
 let userTickets = [];
 let userOrders = [];
+let newsletterPreferences = null;
 
 // ===========================
 // INITIALISATION
@@ -15,16 +14,10 @@ let userOrders = [];
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initialisation de la page Mon Compte');
     
-    // Vérifier l'authentification
     await checkAuthentication();
-    
-    // Charger les données initiales
     await loadUserData();
     
-    // Configurer la navigation
     setupNavigation();
-    
-    // Afficher la section par défaut
     showSection('tickets');
 });
 
@@ -39,7 +32,6 @@ async function checkAuthentication() {
         });
         
         if (!response.ok) {
-            // Rediriger vers la page de connexion
             window.location.href = '/connexion.html';
             return;
         }
@@ -49,7 +41,6 @@ async function checkAuthentication() {
     } catch (error) {
         console.error('Erreur d\'authentification:', error);
         showError('Erreur de connexion. Veuillez vous reconnecter.');
-        // Redirection après 2 secondes
         setTimeout(() => {
             window.location.href = '/connexion.html';
         }, 2000);
@@ -69,11 +60,11 @@ function updateWelcomeMessage() {
 
 async function loadUserData() {
     try {
-        // Charger en parallèle pour plus de rapidité
         await Promise.all([
             loadTickets(),
             loadOrders(),
-            loadUserProfile()
+            loadUserProfile(),
+            loadNewsletterPreferences() // ⭐ NOUVEAU
         ]);
     } catch (error) {
         console.error('Erreur de chargement des données:', error);
@@ -81,13 +72,11 @@ async function loadUserData() {
     }
 }
 
-// Charger les billets
 async function loadTickets() {
     const loader = document.getElementById('ticketsLoader');
     const container = document.getElementById('ticketsContainer');
     
     try {
-        // Afficher le loader
         if (loader) loader.style.display = 'block';
         
         const response = await fetch(`${API_BASE_URL}/Billets`, {
@@ -106,7 +95,6 @@ async function loadTickets() {
         userTickets = [];
         displayTickets();
     } finally {
-        // Cacher le loader
         if (loader) loader.style.display = 'none';
     }
 }
@@ -116,11 +104,10 @@ function displayTickets() {
     
     if (!container) return;
     
-    // Cas : Aucun billet
     if (userTickets.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: #666;">
-                <p style="font-size: 1.2em;">📭 Vous n'avez pas encore de billets</p>
+                <p style="font-size: 1.2em;">🔭 Vous n'avez pas encore de billets</p>
                 <p style="margin-top: 10px;">Découvrez nos offres et réservez vos places pour les JO 2024 !</p>
                 <a href="/offres.html" class="btn btn-primary" style="margin-top: 20px; display: inline-block;">
                     🎫 Découvrir les offres
@@ -130,7 +117,6 @@ function displayTickets() {
         return;
     }
     
-    // Afficher les billets
     container.innerHTML = userTickets.map(billet => `
         <div class="ticket-card" onclick="toggleTicketDetails(this)">
             <div class="ticket-header">
@@ -182,13 +168,11 @@ function displayTickets() {
     `).join('');
 }
 
-// Charger les commandes
 async function loadOrders() {
     const loader = document.getElementById('ordersLoader');
     const tbody = document.getElementById('ordersContainer');
     
     try {
-        // Afficher le loader
         if (loader) loader.style.display = 'block';
         
         const response = await fetch(`${API_BASE_URL}/Commandes`, {
@@ -207,7 +191,6 @@ async function loadOrders() {
         userOrders = [];
         displayOrders();
     } finally {
-        // Cacher le loader
         if (loader) loader.style.display = 'none';
     }
 }
@@ -217,12 +200,11 @@ function displayOrders() {
     
     if (!tbody) return;
     
-    // Cas : Aucune commande
     if (userOrders.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
-                    📭 Aucune commande pour le moment<br>
+                    🔭 Aucune commande pour le moment<br>
                     <small style="margin-top: 10px; display: block;">
                         Vos commandes apparaîtront ici après votre premier achat
                     </small>
@@ -232,7 +214,6 @@ function displayOrders() {
         return;
     }
     
-    // Afficher les commandes
     tbody.innerHTML = userOrders.map(commande => `
         <tr>
             <td><strong>${escapeHtml(commande.numero)}</strong></td>
@@ -259,13 +240,11 @@ function displayOrders() {
     `).join('');
 }
 
-// Charger le profil utilisateur
 async function loadUserProfile() {
     const loader = document.getElementById('settingsLoader');
     const form = document.getElementById('profileForm');
     
     try {
-        // Afficher le loader
         if (loader) loader.style.display = 'block';
         
         const response = await fetch(`${API_BASE_URL}/Compte/profile`, {
@@ -279,11 +258,9 @@ async function loadUserProfile() {
         const profile = await response.json();
         fillProfileForm(profile);
         
-        // Afficher le formulaire
         if (form) form.style.display = 'block';
     } catch (error) {
         console.error('Erreur:', error);
-        // En cas d'erreur, utiliser les données de currentUser si disponibles
         if (currentUser) {
             fillProfileForm({
                 prenom: currentUser.prenom,
@@ -293,7 +270,6 @@ async function loadUserProfile() {
             if (form) form.style.display = 'block';
         }
     } finally {
-        // Cacher le loader
         if (loader) loader.style.display = 'none';
     }
 }
@@ -305,6 +281,150 @@ function fillProfileForm(profile) {
 }
 
 // ===========================
+// ⭐ NOUVEAU: GESTION NEWSLETTER
+// ===========================
+
+async function loadNewsletterPreferences() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            // Si pas de préférences, créer par défaut
+            newsletterPreferences = {
+                estAbonne: false,
+                categories: {
+                    sports: false,
+                    evenements: false,
+                    billets: false
+                }
+            };
+        } else {
+            newsletterPreferences = await response.json();
+        }
+        
+        displayNewsletterForm();
+    } catch (error) {
+        console.error('Erreur chargement newsletter:', error);
+        newsletterPreferences = {
+            estAbonne: false,
+            categories: { sports: false, evenements: false, billets: false }
+        };
+        displayNewsletterForm();
+    }
+}
+
+function displayNewsletterForm() {
+    const newsletterAbonne = document.getElementById('newsletterAbonne');
+    const categoriesSection = document.getElementById('categoriesSection');
+    
+    if (!newsletterAbonne) return;
+    
+    // Remplir le formulaire
+    newsletterAbonne.checked = newsletterPreferences?.estAbonne || false;
+    
+    // Créer les checkboxes de catégories
+    if (categoriesSection) {
+        categoriesSection.innerHTML = `
+            <h4>Catégories d'épreuves :</h4>
+            <div style="margin-left: 20px;">
+                <label class="checkbox-label" style="display: block; margin: 10px 0;">
+                    <input type="checkbox" id="category_sport" name="category_sport" 
+                        ${newsletterPreferences?.categories?.sports ? 'checked' : ''}>
+                    🏃 Sports
+                </label>
+                <label class="checkbox-label" style="display: block; margin: 10px 0;">
+                    <input type="checkbox" id="category_evenements" name="category_evenements"
+                        ${newsletterPreferences?.categories?.evenements ? 'checked' : ''}>
+                    🎉 Événements
+                </label>
+                <label class="checkbox-label" style="display: block; margin: 10px 0;">
+                    <input type="checkbox" id="category_billets" name="category_billets"
+                        ${newsletterPreferences?.categories?.billets ? 'checked' : ''}>
+                    🎫 Offres billets
+                </label>
+            </div>
+        `;
+        
+        // Afficher/masquer les catégories selon l'abonnement
+        updateCategoriesVisibility();
+    }
+    
+    // Gérer le toggle de l'abonnement
+    newsletterAbonne.addEventListener('change', updateCategoriesVisibility);
+}
+
+function updateCategoriesVisibility() {
+    const newsletterAbonne = document.getElementById('newsletterAbonne');
+    const categoriesSection = document.getElementById('categoriesSection');
+    const categoryInputs = categoriesSection?.querySelectorAll('input[type="checkbox"]');
+    
+    if (!newsletterAbonne || !categoriesSection) return;
+    
+    const isSubscribed = newsletterAbonne.checked;
+    
+    // Afficher/masquer les catégories
+    if (categoryInputs) {
+        categoryInputs.forEach(input => {
+            input.disabled = !isSubscribed;
+            input.closest('label').style.opacity = isSubscribed ? '1' : '0.5';
+        });
+    }
+    
+    // Si on décoche, décocher toutes les catégories
+    if (!isSubscribed && categoryInputs) {
+        categoryInputs.forEach(input => input.checked = false);
+    }
+}
+
+async function saveNewsletterPreferences(event) {
+    event.preventDefault();
+    
+    const newsletterAbonne = document.getElementById('newsletterAbonne');
+    const estAbonne = newsletterAbonne?.checked || false;
+    
+    const updateDto = {
+        estAbonne: estAbonne,
+        categories: {
+            sports: estAbonne && document.getElementById('category_sport')?.checked || false,
+            evenements: estAbonne && document.getElementById('category_evenements')?.checked || false,
+            billets: estAbonne && document.getElementById('category_billets')?.checked || false
+        }
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(updateDto)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors de la mise à jour');
+        }
+        
+        const result = await response.json();
+        
+        // Message personnalisé
+        if (estAbonne) {
+            showSuccess('✅ Préférences mises à jour ! Vous recevrez la newsletter selon vos choix.');
+        } else {
+            showSuccess('✅ Vous avez été désinscrit de la newsletter.');
+        }
+        
+        // Recharger les préférences
+        await loadNewsletterPreferences();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible de mettre à jour vos préférences newsletter');
+    }
+}
+
+// ===========================
 // ACTIONS SUR LES BILLETS
 // ===========================
 
@@ -312,12 +432,10 @@ function toggleTicketDetails(card) {
     const details = card.querySelector('.ticket-details');
     const isOpen = details.style.display === 'block';
     
-    // Fermer tous les détails ouverts
     document.querySelectorAll('.ticket-details').forEach(d => {
         d.style.display = 'none';
     });
     
-    // Ouvrir celui-ci si il était fermé
     if (!isOpen) {
         details.style.display = 'block';
     }
@@ -344,7 +462,6 @@ async function viewQRCode(event, billetId) {
 }
 
 function showQRCodeModal(billet) {
-    // Créer la modal
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
@@ -370,7 +487,6 @@ function showQRCodeModal(billet) {
     
     document.body.appendChild(modal);
     
-    // Fermer en cliquant en dehors
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.remove();
@@ -394,7 +510,6 @@ async function downloadPDF(event, billetId) {
         const result = await response.json();
         showSuccess('PDF généré avec succès ! Téléchargement en cours...');
         
-        // TODO: Implémenter le téléchargement réel du PDF
         console.log('Download URL:', result.downloadUrl);
     } catch (error) {
         console.error('Erreur:', error);
@@ -456,7 +571,6 @@ async function saveSettings(event) {
         
         showSuccess('✅ Informations mises à jour avec succès !');
         
-        // Recharger les données utilisateur
         await checkAuthentication();
     } catch (error) {
         console.error('Erreur:', error);
@@ -471,7 +585,6 @@ async function changePassword(event) {
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
-    // Validation
     if (newPassword !== confirmPassword) {
         showError('Les mots de passe ne correspondent pas');
         return;
@@ -502,7 +615,6 @@ async function changePassword(event) {
         
         showSuccess('✅ Mot de passe modifié avec succès !');
         
-        // Réinitialiser le formulaire
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
@@ -553,6 +665,7 @@ async function downloadUserData() {
     }
 }
 
+// ⭐ MODIFICATION: Suppression de compte avec confirmation par email
 function confirmDeleteAccount() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +
@@ -560,7 +673,8 @@ function confirmDeleteAccount() {
         'Cette action est IRRÉVERSIBLE et entraînera :\n' +
         '• La suppression de toutes vos données personnelles\n' +
         '• La perte de tous vos billets\n' +
-        '• L\'annulation de toutes vos commandes'
+        '• L\'annulation de toutes vos commandes\n' +
+        '• La désinscription de la newsletter'
     );
     
     if (confirmed) {
@@ -582,7 +696,7 @@ async function deleteAccount() {
             throw new Error('Erreur lors de la suppression');
         }
         
-        alert('Votre compte a été supprimé. Vous allez être déconnecté.');
+        alert('✅ Votre compte a été supprimé. Un email de confirmation vous a été envoyé. Vous allez être déconnecté.');
         window.location.href = '/';
     } catch (error) {
         console.error('Erreur:', error);
@@ -603,7 +717,6 @@ function setupNavigation() {
             const section = link.dataset.section;
             showSection(section);
             
-            // Mettre à jour les liens actifs
             navLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
         });
@@ -611,12 +724,10 @@ function setupNavigation() {
 }
 
 function showSection(sectionName) {
-    // Masquer toutes les sections
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
     });
     
-    // Afficher la section demandée
     const section = document.getElementById(sectionName);
     if (section) {
         section.classList.add('active');
@@ -672,7 +783,6 @@ function showSuccess(message) {
         successDiv.textContent = message;
         successDiv.style.display = 'block';
         
-        // Auto-masquer après 5 secondes
         setTimeout(() => {
             successDiv.style.display = 'none';
         }, 5000);
@@ -685,14 +795,12 @@ function showError(message) {
         errorDiv.textContent = '❌ ' + message;
         errorDiv.style.display = 'block';
         
-        // Auto-masquer après 5 secondes
         setTimeout(() => {
             errorDiv.style.display = 'none';
         }, 5000);
     }
 }
 
-// Protection XSS : échapper les caractères HTML
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');

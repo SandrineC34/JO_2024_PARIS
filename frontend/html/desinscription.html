@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Désinscription Newsletter - Jeux Olympiques 2024</title>
+    <link rel="stylesheet" href="/css/desinscription.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/connexion.css">
+    
+</head>
+<body>
+    <!-- Header -->
+    <div id="header-container"></div>
+
+    <main>
+        <div class="unsubscribe-container" id="unsubscribeContainer">
+            <!-- Loading -->
+            <div id="loadingSection" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Traitement en cours...</p>
+            </div>
+
+            <!-- Formulaire de confirmation -->
+            <div id="confirmForm">
+                <div class="unsubscribe-icon">📧</div>
+                <h1 class="unsubscribe-title">Désinscription Newsletter</h1>
+                
+                <div class="unsubscribe-message">
+                    <p>Vous êtes sur le point de vous désinscrire de la newsletter des Jeux Olympiques 2024.</p>
+                    <p><strong>Vous ne recevrez plus :</strong></p>
+                    <ul style="text-align: left; display: inline-block; margin: 20px auto;">
+                        <li>Les actualités sur les épreuves sportives</li>
+                        <li>Les informations sur les événements</li>
+                        <li>Les offres spéciales sur les billets</li>
+                    </ul>
+                    <p style="margin-top: 20px;">Vous pourrez vous réabonner à tout moment depuis votre compte.</p>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="confirmUnsubscribe()">
+                        ❌ Confirmer la désinscription
+                    </button>
+                    <button class="btn btn-outline" onclick="cancel()">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+
+            <!-- Message de succès -->
+            <div id="successMessage" style="display: none;">
+                <div class="unsubscribe-icon">✅</div>
+                <h1 class="unsubscribe-title">Désinscription confirmée</h1>
+                
+                <div class="unsubscribe-message">
+                    <p>Vous avez été désinscrit avec succès de notre newsletter.</p>
+                    <p>Nous espérons vous revoir bientôt !</p>
+                </div>
+
+                <div class="btn-group">
+                    <a href="/" class="btn btn-primary">
+                        Retour à l'accueil
+                    </a>
+                    <a href="/compte.html" class="btn btn-outline">
+                        Mon compte
+                    </a>
+                </div>
+            </div>
+
+            <!-- Message d'erreur -->
+            <div id="errorMessage" style="display: none;">
+                <div class="unsubscribe-icon">⚠️</div>
+                <h1 class="unsubscribe-title">Erreur</h1>
+                
+                <div class="unsubscribe-message">
+                    <p id="errorText"></p>
+                </div>
+
+                <div class="btn-group">
+                    <a href="/" class="btn btn-primary">
+                        Retour à l'accueil
+                    </a>
+                    <a href="/compte.html" class="btn btn-outline">
+                        Mon compte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <script>
+        // Chargement du header et footer
+        (async function() {
+            try {
+                const headerResponse = await fetch('/header.html');
+                if (headerResponse.ok) {
+                    document.getElementById('header-container').innerHTML = await headerResponse.text();
+                }
+                
+                const footerResponse = await fetch('/footer.html');
+                if (footerResponse.ok) {
+                    document.getElementById('footer-container').innerHTML = await footerResponse.text();
+                }
+            } catch (error) {
+                console.error('Erreur chargement:', error);
+            }
+        })();
+
+        // Récupérer le token depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        // Si pas de token, afficher une erreur
+        if (!token) {
+            showError('Lien invalide. Aucun token de désinscription trouvé.');
+        }
+
+        async function confirmUnsubscribe() {
+            if (!token) {
+                showError('Token invalide');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch(`/api/Newsletter/unsubscribe/confirm`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token: token })
+                });
+
+                hideLoading();
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Erreur lors de la désinscription');
+                }
+
+                // Afficher le succès
+                document.getElementById('confirmForm').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+            } catch (error) {
+                hideLoading();
+                console.error('Erreur:', error);
+                showError(error.message || 'Une erreur est survenue');
+            }
+        }
+
+        function cancel() {
+            window.location.href = '/';
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('confirmForm').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSection').style.display = 'none';
+            document.getElementById('confirmForm').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('confirmForm').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorText').textContent = message;
+        }
+    </script>
+</body>
+</html>
