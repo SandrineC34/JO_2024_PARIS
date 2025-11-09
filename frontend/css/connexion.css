@@ -26,6 +26,7 @@ body {
     min-height: 600px;
 }
 
+/* Section Formulaire */
 .form-section {
     padding: 40px;
     display: flex;
@@ -36,9 +37,157 @@ body {
 .form-section h2 {
     color: #004e92;
     margin-bottom: 30px;
-    font-size: 2re
+    font-size: 2rem;
 }
-    /* === Ajouot d'une Section Newsletter === */
+
+/* Groupes de formulaire */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #009ffd;
+    box-shadow: 0 0 0 3px rgba(0, 159, 253, 0.1);
+}
+
+.form-group input.error {
+    border-color: #dc3545;
+}
+
+/* Messages d'erreur */
+.error-message {
+    display: none;
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* Messages globaux */
+.message {
+    display: none;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Boutons */
+.btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 78, 146, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Mot de passe oublié */
+.forgot-password {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.forgot-password a {
+    color: #009ffd;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+    color: #004e92;
+    text-decoration: underline;
+}
+
+/* Switch entre formulaires */
+.switch-form {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.switch-form p {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.switch-form a {
+    color: #009ffd;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.switch-form a:hover {
+    color: #004e92;
+    text-decoration: underline;
+}
+
+/* Exigences mot de passe */
+.password-requirements {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-left: 3px solid #ffc107;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Section Newsletter */
 .newsletter-section {
     margin-top: 20px;
     padding: 15px;
@@ -48,16 +197,26 @@ body {
 }
 
 .newsletter-section h4 {
-    margin-bottom: 10px;
+    margin: 0 0 12px 0;
     color: #004e92;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
-.newsletter-section .checkbox-label {
+.checkbox-label {
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+    margin: 0;
 }
 
 #newsletterCategories {
@@ -67,9 +226,186 @@ body {
 
 #newsletterCategories label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
 }
 
+#newsletterCategories input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* Section RGPD */
+.rgpd-section {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+}
+
+.rgpd-section .checkbox-label {
+    font-size: 0.9rem;
+    color: #856404;
+}
+
+.rgpd-section a {
+    color: #004e92;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.rgpd-section a:hover {
+    color: #009ffd;
+}
+
+/* Section Bienvenue */
+.welcome-section {
+    background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.olympic-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.welcome-section h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.welcome-section p {
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.95;
+}
+
+/* Loading spinner */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #009ffd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading p {
+    color: #666;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .auth-container {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+    }
+
+    .welcome-section {
+        display: none;
+    }
+
+    .form-section {
+        padding: 30px 20px;
+    }
+
+    .form-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .main-content {
+        padding: 20px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-section {
+        padding: 20px 15px;
+    }
+
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    .btn {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    .newsletter-section,
+    .rgpd-section {
+        padding: 12px;
+    }
+}
+
+/* Animations d'entrée */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-container {
+    animation: fadeIn 0.6s ease;
+}
+
+/* États de focus améliorés */
+input:focus,
+button:focus {
+    outline: none;
+}
+
+input:focus-visible {
+    outline: 2px solid #009ffd;
+    outline-offset: 2px;
+}
+
+button:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* Amélioration de l'accessibilité */
+.checkbox-label:focus-within {
+    outline: 2px solid #009ffd;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Style pour les liens dans les sections */
+a {
+    transition: all 0.3s ease;
+}
+
+/* Correction de l'espacement des boutons d'inscription */
 #registerBtn {
     margin-top: 20px;
 }

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Panier - Jeux Olympiques 2024</title>
-    <link rel="stylesheet" href="../css/common.css">
-    <link rel="stylesheet" href="../css/panier.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/panier.css">
 </head>
 <body>
     <!--header de navigation -->
@@ -109,10 +109,39 @@
  <!-- Footer  -->
     <div id="footer-container"></div>
 
-    <!-- JavaScript commun  -->
-    <script src="../js/common.js"></script>
-    <!-- JavaScript  -->
-    <script src="../js/accueil.js"></script>
+    <!-- Scripts inline pour garantir le chargement -->
+    <script>
+        // Chargement immédiat du header et footer
+        (async function() {
+            console.log('🚀 Chargement header/footer...');
+            
+            try {
+                // Charger header
+                const headerResponse = await fetch('/header.html');
+                if (headerResponse.ok) {
+                    document.getElementById('header-container').innerHTML = await headerResponse.text();
+                    console.log('✅ Header chargé');
+                } else {
+                    console.error('❌ Header non trouvé:', headerResponse.status);
+                }
+                
+                // Charger footer
+                const footerResponse = await fetch('/footer.html');
+                if (footerResponse.ok) {
+                    document.getElementById('footer-container').innerHTML = await footerResponse.text();
+                    console.log('✅ Footer chargé');
+                } else {
+                    console.error('❌ Footer non trouvé:', footerResponse.status);
+                }
+            } catch (error) {
+                console.error('❌ Erreur chargement:', error);
+            }
+        })();
+    </script>
+    
+    <!-- Scripts externes -->
+    <script src="/js/common.js"></script>
+    <script src="/js/accueil.js"></script>
     
 </body>
 </html>      

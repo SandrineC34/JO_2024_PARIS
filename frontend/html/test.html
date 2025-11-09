@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de chargement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        #header-container, #footer-container {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 50px;
+            background: white;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Page de diagnostic</h1>
+    
+    <div id="results"></div>
+    
+    <h2>Header (devrait apparaître ci-dessous) :</h2>
+    <div id="header-container"></div>
+    
+    <h2>Footer (devrait apparaître ci-dessous) :</h2>
+    <div id="footer-container"></div>
+    
+    <h2>📊 Logs détaillés :</h2>
+    <pre id="logs"></pre>
+
+    <script>
+        const results = document.getElementById('results');
+        const logsEl = document.getElementById('logs');
+        let logs = [];
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push(`[${timestamp}] ${message}`);
+            logsEl.textContent = logs.join('\n');
+            console.log(message);
+        }
+        
+        function addResult(message, isSuccess) {
+            const div = document.createElement('div');
+            div.className = `status ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = (isSuccess ? '✅ ' : '❌ ') + message;
+            results.appendChild(div);
+        }
+        
+        addLog('🚀 Page chargée, début des tests...');
+        
+        // Test 1: Vérifier que le DOM est prêt
+        document.addEventListener('DOMContentLoaded', async function() {
+            addLog('✅ DOMContentLoaded déclenché');
+            addResult('DOM chargé avec succès', true);
+            
+            // Test 2: Vérifier l'URL actuelle
+            addLog(`📍 URL: ${window.location.href}`);
+            addLog(`📂 Pathname: ${window.location.pathname}`);
+            
+            // Test 3: Tester les chemins possibles
+            const paths = [
+                '/header.html',
+                '/includes/header.html',
+                'header.html',
+                './header.html'
+            ];
+            
+            addLog('\n🔍 Test des chemins possibles pour header.html:');
+            
+            for (const path of paths) {
+                try {
+                    addLog(`\n  Tentative: ${path}`);
+                    const response = await fetch(path);
+                    addLog(`  → Status: ${response.status} ${response.statusText}`);
+                    addLog(`  → URL résolue: ${response.url}`);
+                    
+                    if (response.ok) {
+                        const content = await response.text();
+                        addLog(`  → Contenu chargé: ${content.length} caractères`);
+                        addResult(`Header trouvé à: ${path}`, true);
+                        
+                        // Charger le header dans le container
+                        document.getElementById('header-container').innerHTML = content;
+                        break;
+                    } else {
+                        addResult(`${path} → ${response.status}`, false);
+                    }
+                } catch (error) {
+                    addLog(`  → Erreur: ${error.message}`);
+                    addResult(`${path} → Erreur réseau`, false);
+                }
+            }
+            
+            // Test 4: Tester footer.html avec le même chemin qui a fonctionné
+            addLog('\n🔍 Test pour footer.html:');
+            for (const path of ['/footer.html', '/includes/footer.html', 'footer.html']) {
+                try {
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        const content = await response.text();
+                        document.getElementById('footer-container').innerHTML = content;
+                        addResult(`Footer trouvé à: ${path}`, true);
+                        break;
+                    }
+                } catch (error) {
+                    addLog(`  Footer ${path}: ${error.message}`);
+                }
+            }
+            
+            // Test 5: Vérifier common.js
+            addLog('\n🔍 Vérification de common.js:');
+            try {
+                const response = await fetch('/js/common.js');
+                if (response.ok) {
+                    addResult('common.js accessible', true);
+                } else {
+                    addResult(`common.js → ${response.status}`, false);
+                }
+            } catch (error) {
+                addResult('common.js non accessible', false);
+            }
+            
+            addLog('\n✅ Tests terminés');
+        });
+    </script>
+</body>
+</html>

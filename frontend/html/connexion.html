@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - Jeux Olympiques 2024</title>
-    <link rel="stylesheet" href="../css/common.css">
-    <link rel="stylesheet" href="../css/connexion.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/connexion.css">
 </head>
 <body>
     <!-- Header -->
@@ -47,11 +47,11 @@
                         </form>
 
                         <div class="forgot-password">
-                            <a href="#" onclick="showForgotPassword()">Mot de passe oublié ?</a>
+                            <a href="#" onclick="showForgotPassword(); return false;">Mot de passe oublié ?</a>
                         </div>
 
                         <div class="switch-form">
-                            <p>Pas encore de compte ? <a href="#" onclick="showRegisterForm()">Créer un compte</a></p>
+                            <p>Pas encore de compte ? <a href="#" onclick="showRegisterForm(); return false;">Créer un compte</a></p>
                         </div>
                     </div>
 
@@ -97,28 +97,39 @@
                                 <div class="error-message" id="confirmPasswordError"></div>
                             </div>
 
-                            <!-- Ajout du consentement newsletter DANS le formulaire -->
-                            <div class="form-group newsletter-section">
-                                <h4>Newsletter JO 2024</h4>
+                            <!-- Bloc Newsletter -->
+                            <div class="newsletter-section">
+                                <h4>Recevoir la newsletter</h4>
                                 <label class="checkbox-label">
-                                    <input type="checkbox" id="newsletterConsent" name="newsletterConsent">
-                                    Je souhaite recevoir la newsletter hebdomadaire (tous les lundis à 8h)
+                                    <input type="checkbox" id="newsletterConsent" name="newsletterConsent" checked />
+                                    Je souhaite recevoir des informations (newsletter)
                                 </label>
-                                
-                                <div id="newsletterCategories" style="display: none; margin-left: 20px;">
-                                    <p><strong>Catégories d'épreuves qui m'intéressent :</strong></p>
-                                    <label><input type="checkbox" name="categories[]" value="Athlétisme"> Athlétisme</label><br>
-                                    <label><input type="checkbox" name="categories[]" value="Natation"> Natation</label><br>
-                                    <label><input type="checkbox" name="categories[]" value="Gymnastique"> Gymnastique</label><br>
-                                    <!-- Prévoir d’ajouter d’autres épreuves -->
+                                <div id="newsletterCategories" style="display: block; margin-left: 20px; margin-top: 10px;">
+                                    <label style="display: block; margin: 5px 0;">
+                                        <input type="checkbox" name="category_sport" /> Sports
+                                    </label>
+                                    <label style="display: block; margin: 5px 0;">
+                                        <input type="checkbox" name="category_evenements" /> Événements
+                                    </label>
+                                    <label style="display: block; margin: 5px 0;">
+                                        <input type="checkbox" name="category_billets" /> Offres billets
+                                    </label>
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn" id="registerBtn">Créer mon compte</button>
+                            <!-- Bloc RGPD -->
+                            <div class="rgpd-section" style="margin-top: 15px;">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="rgpdConsent" name="rgpdConsent" required />
+                                    J'accepte la <a href="politique-confidentialite.html" target="_blank">politique de confidentialité</a> *
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn" id="registerBtn" style="margin-top: 20px;">Créer mon compte</button>
                         </form>
 
                         <div class="switch-form">
-                            <p>Déjà un compte ? <a href="#" onclick="showLoginForm()">Se connecter</a></p>
+                            <p>Déjà un compte ? <a href="#" onclick="showLoginForm(); return false;">Se connecter</a></p>
                         </div>
                     </div>
 
@@ -139,7 +150,7 @@
                         </form>
 
                         <div class="switch-form">
-                            <p><a href="#" onclick="showLoginForm()">Retour à la connexion</a></p>
+                            <p><a href="#" onclick="showLoginForm(); return false;">Retour à la connexion</a></p>
                         </div>
                     </div>
                 </div>
@@ -162,18 +173,58 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
+ 
+    <!-- Footer  -->
     <div id="footer-container"></div>
 
-    <!-- JavaScript -->
-    <script src="../js/common.js"></script>
-    <script src="../js/connexion.js"></script>
+    <!-- Scripts inline pour garantir le chargement -->
     <script>
-        document.getElementById('newsletterConsent').addEventListener('change', function() {
-            document.getElementById('newsletterCategories').style.display = 
-                this.checked ? 'block' : 'none';
-        });
+        // Chargement immédiat du header et footer
+        (async function() {
+            console.log('🚀 Chargement header/footer...');
+            
+            try {
+                // Charger header
+                const headerResponse = await fetch('/header.html');
+                if (headerResponse.ok) {
+                    document.getElementById('header-container').innerHTML = await headerResponse.text();
+                    console.log('✅ Header chargé');
+                    
+                    // Mettre à jour le compteur panier après chargement du header
+                    setTimeout(() => {
+                        const cartCount = localStorage.getItem('cartCount') || 0;
+                        const cartElement = document.getElementById('cart-count');
+                        if (cartElement) {
+                            cartElement.textContent = cartCount;
+                        }
+                    }, 100);
+                } else {
+                    console.error('❌ Header non trouvé:', headerResponse.status);
+                }
+                
+                // Charger footer
+                const footerResponse = await fetch('/footer.html');
+                if (footerResponse.ok) {
+                    document.getElementById('footer-container').innerHTML = await footerResponse.text();
+                    console.log('✅ Footer chargé');
+                } else {
+                    console.error('❌ Footer non trouvé:', footerResponse.status);
+                }
+            } catch (error) {
+                console.error('❌ Erreur chargement:', error);
+            }
+        })();
+        
+        // Fonction pour le menu mobile (nécessaire pour le header)
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            if (navMenu) {
+                navMenu.classList.toggle('active');
+            }
+        }
     </script>
+    
+    <!-- Script connexion uniquement -->
+    <script src="/js/connexion.js"></script>
 </body>
 </html>

@@ -30,29 +30,11 @@ namespace JO2024.API
             var env = builder.Environment.EnvironmentName.ToLower();
 
             // === 🐋 SECTION DOCKER LOCAL ===
-            // 👉 Active si tu déploies via Docker Desktop (MySQL)
-            // <docker>
-            var connectionStringDocker = builder.Configuration.GetConnectionString("MySQLConnection")
-                ?? "server=mysql;port=3306;database=jo2024db;user=root;password=example;";
-            builder.Services.AddDbContext<AppDbContext>(options =>
+            var connectionStringDocker = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? "Server=mysql;Database=jo2024_db;User=jo2024_user;Password=JO2024Pass123!;";
+            
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(connectionStringDocker, ServerVersion.AutoDetect(connectionStringDocker)));
-            // </docker>
-
-            // === ☁️ SECTION RENDER DEPLOYMENT ===
-            // 👉 Décommente si tu déploies sur Render (PostgreSQL)
-            /*
-            // <render>
-            var connectionStringRender = Environment.GetEnvironmentVariable("DATABASE_URL");
-            if (!string.IsNullOrEmpty(connectionStringRender))
-            {
-                var databaseUri = new Uri(connectionStringRender);
-                var userInfo = databaseUri.UserInfo.Split(':');
-                var connStr = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true;";
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql(connStr));
-            }
-            // </render>
-            */
 
             // ============================================================
             // 🔐 AUTHENTIFICATION JWT
@@ -80,9 +62,31 @@ namespace JO2024.API
             // ============================================================
             // 🧩 DEPENDENCY INJECTION
             // ============================================================
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
+            
+            // Repositories
+            builder.Services.AddScoped<IUtilisateurRepository, UtilisateurRepository>();
+            builder.Services.AddScoped<IOffreRepository, OffreRepository>();
+            builder.Services.AddScoped<IBilletRepository, BilletRepository>();
+            builder.Services.AddScoped<ICommandeRepository, CommandeRepository>();
+            
+            // Services
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IBilletService, BilletService>();
+            builder.Services.AddScoped<ICommandeService, CommandeService>();
+            builder.Services.AddScoped<IQRCodeService, QRCodeService>();
+            builder.Services.AddScoped<IOffreService, OffreService>();
+
+            // CORS Configuration
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
 
             var app = builder.Build();
 
@@ -96,7 +100,7 @@ namespace JO2024.API
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
@@ -106,10 +110,22 @@ namespace JO2024.API
             // ============================================================
             using (var scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                db.Database.Migrate();
+                try
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    db.Database.Migrate();
+                    Console.WriteLine("✅ Database migrations applied successfully");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Error applying migrations: {ex.Message}");
+                }
             }
 
+            // Health Check endpoint
+            app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
+            Console.WriteLine("🚀 JO2024 API is starting...");
             app.Run();
         }
     }

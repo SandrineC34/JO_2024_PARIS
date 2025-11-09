@@ -8,22 +8,16 @@ const CONFIG = {
     apiBaseUrl: 'https://votre-api.com/api'
 };
 
-// Menu mobile
-function toggleMenu() {
-    const navMenu = document.getElementById('navMenu');
-    navMenu.classList.toggle('active');
-}
-
-// Fermer le menu mobile
+// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#navMenu a').forEach(link => {
-        link.addEventListener('click', () => {
-            document.getElementById('navMenu').classList.remove('active');
-        });
-    });
-    
-    // Initialisation
+    // Initialisation de l'authentification
     initializeAuth();
+    
+    // Gestion de la newsletter
+    initializeNewsletterToggle();
+    
+    // Gestion des événements de saisie
+    initializeInputValidation();
 });
 
 // Initialisation de l'authentification
@@ -31,17 +25,27 @@ function initializeAuth() {
     // Masquer le loading au démarrage
     hideLoading();
     
-    // Vérifier si déjà connecté
-    if (currentUser && window.location.pathname.includes('connexion.html')) {
-        showMessage('success', `Vous êtes déjà connecté en tant que ${currentUser.firstName}`);
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000);
-        return;
-    }
+    // NE PAS rediriger automatiquement - laisser l'utilisateur sur la page
+    // L'utilisateur peut vouloir créer un autre compte ou se déconnecter
     
     // Animation d'entrée
     setTimeout(addEntryAnimation, 100);
+}
+
+// Initialisation du toggle newsletter
+function initializeNewsletterToggle() {
+    const newsletterConsent = document.getElementById('newsletterConsent');
+    const newsletterCategories = document.getElementById('newsletterCategories');
+
+    if (newsletterConsent && newsletterCategories) {
+        // Afficher les catégories si la checkbox est cochée
+        newsletterCategories.style.display = newsletterConsent.checked ? 'block' : 'none';
+
+        // Gérer le changement d'état
+        newsletterConsent.addEventListener('change', () => {
+            newsletterCategories.style.display = newsletterConsent.checked ? 'block' : 'none';
+        });
+    }
 }
 
 // Affichage des formulaires
@@ -69,41 +73,6 @@ function showForgotPassword() {
     resetForms();
 }
 
-// === GESTION NEWSLETTER ===
-document.addEventListener("DOMContentLoaded", () => {
-    const newsletterConsent = document.getElementById("newsletterConsent");
-    const newsletterCategories = document.getElementById("newsletterCategories");
-
-    if (newsletterConsent && newsletterCategories) {
-        // 🔹 Afficher directement la section newsletter au chargement
-        newsletterConsent.checked = true;
-        newsletterCategories.style.display = "block";
-
-        // 🔹 Conserver le comportement dynamique au clic
-        newsletterConsent.addEventListener("change", () => {
-            newsletterCategories.style.display = newsletterConsent.checked ? "block" : "none";
-        });
-    }
-});
-
-// === SIMULATION D’ACTIONS ===
-function handleLogin(event) {
-    event.preventDefault();
-    alert("Connexion simulée !");
-}
-
-function handleRegister(event) {
-    event.preventDefault();
-    alert("Inscription simulée !");
-}
-
-function handleForgotPassword(event) {
-    event.preventDefault();
-    alert("Lien de réinitialisation simulé !");
-}
-
-
-
 // Réinitialiser les formulaires
 function resetForms() {
     // Réinitialiser tous les formulaires
@@ -116,6 +85,9 @@ function resetForms() {
     if (registerBtn) {
         registerBtn.disabled = false;
     }
+    
+    // Réinitialiser l'affichage des catégories newsletter
+    initializeNewsletterToggle();
 }
 
 // Gestion des messages
@@ -283,7 +255,9 @@ async function handleLogin(event) {
         }
     } catch (error) {
         console.error('Erreur lors de la connexion:', error);
-        showMessage('error', 'Une erreur technique est survenue. Veuillez réessayer.');
+        if (!error.message.includes('User not found') && !error.message.includes('Wrong password')) {
+            showMessage('error', 'Une erreur technique est survenue. Veuillez réessayer.');
+        }
     } finally {
         hideLoading();
     }
@@ -353,7 +327,7 @@ async function handleRegister(event) {
         }
     } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);
-        if (!error.message.includes('déjà utilisé')) {
+        if (!error.message.includes('déjà utilisé') && !error.message.includes('RGPD')) {
             showMessage('error', 'Une erreur technique est survenue. Veuillez réessayer.');
         }
     } finally {
@@ -420,6 +394,13 @@ function validateRegisterForm(firstName, lastName, email, password, confirmPassw
         hasErrors = true;
     }
 
+    // Validation RGPD (obligatoire)
+    const rgpdConsent = document.getElementById('rgpdConsent');
+    if (rgpdConsent && !rgpdConsent.checked) {
+        showMessage('error', 'Vous devez accepter la politique de confidentialité pour créer un compte.');
+        hasErrors = true;
+    }
+
     return !hasErrors;
 }
 
@@ -434,6 +415,26 @@ async function simulateRegister(firstName, lastName, email, password) {
                 return;
             }
 
+            // Vérification RGPD
+            const rgpdConsent = document.getElementById('rgpdConsent');
+            if (!rgpdConsent || !rgpdConsent.checked) {
+                showMessage('error', 'Vous devez accepter la politique de confidentialité.');
+                reject(new Error('RGPD non accepté'));
+                return;
+            }
+
+            // Récupération des préférences newsletter
+            const newsletterConsent = document.getElementById('newsletterConsent')?.checked || false;
+            const newsletterPreferences = {
+                subscribed: newsletterConsent,
+                categories: {
+                    sport: newsletterConsent && document.querySelector('[name="category_sport"]')?.checked || false,
+                    evenements: newsletterConsent && document.querySelector('[name="category_evenements"]')?.checked || false,
+                    billets: newsletterConsent && document.querySelector('[name="category_billets"]')?.checked || false
+                },
+                subscribedAt: newsletterConsent ? new Date().toISOString() : null
+            };
+
             // Création de l'utilisateur
             const newUser = {
                 id: generateUserId(),
@@ -442,6 +443,8 @@ async function simulateRegister(firstName, lastName, email, password) {
                 email: email.toLowerCase(),
                 password,
                 securityKey: generateSecurityKey(),
+                newsletter: newsletterPreferences,
+                rgpdAcceptedAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 lastLogin: null,
                 isActive: true
@@ -589,7 +592,7 @@ function addEntryAnimation() {
 }
 
 // Gestion des événements de saisie pour améliorer l'UX
-document.addEventListener('DOMContentLoaded', () => {
+function initializeInputValidation() {
     // Effacer les erreurs lors de la saisie
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', () => {
@@ -625,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+}
 
 // Fonctions pour futures intégrations API
 async function apiLogin(email, password) {
