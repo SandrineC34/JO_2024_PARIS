@@ -149,13 +149,17 @@ echo "  • Frontend:   http://localhost:3000"
 echo "  • API:        http://localhost:5000"
 echo "  • Swagger:    http://localhost:5000/swagger"
 echo "  • phpMyAdmin: http://localhost:8080"
+echo "  • Logs Cron:   ./scheduler_logs/cron.log
 echo ""
 echo "Commandes utiles:"
-echo "  • Voir les logs de l'API:     docker-compose -f desktop-docker-compose.yml logs -f api"
-echo "  • Voir les logs du frontend:  docker-compose -f desktop-docker-compose.yml logs -f frontend"
-echo "  • Voir tous les logs:         docker-compose -f desktop-docker-compose.yml logs -f"
-echo "  • Arrêter les services:       docker-compose -f desktop-docker-compose.yml down"
-echo "  • Redémarrer le frontend:     docker-compose -f desktop-docker-compose.yml restart frontend"
+echo "  • Voir les logs de l'API:        docker-compose -f desktop-docker-compose.yml logs -f api"
+echo "  • Voir les logs du frontend:     docker-compose -f desktop-docker-compose.yml logs -f frontend"
+echo "  • Voir tous les logs:            docker-compose -f desktop-docker-compose.yml logs -f"
+echo "  • Arrêter les services:          docker-compose -f desktop-docker-compose.yml down"
+echo "  • Redémarrer le frontend:        docker-compose -f desktop-docker-compose.yml restart frontend"
+echo "  • lancer manuellement un envoi   docker exec  jo2024_scheduler /app/send-newsletter.sh
+echo "  • voir le résultat               ./scheduler_logs/report.log
+echo "  • voir les logs cron             ./scheduler_logs/cron.log
 echo ""
 log_warn "IMPORTANT: Si vous modifiez des fichiers HTML/CSS/JS, faites Ctrl+Shift+R dans le navigateur pour vider le cache!"
 echo ""

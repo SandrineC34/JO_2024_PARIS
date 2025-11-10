@@ -6,6 +6,59 @@
     <title>Connexion - Jeux Olympiques 2024</title>
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/connexion.css">
+    <style>
+        /* Styles spécifiques pour la section newsletter */
+        .newsletter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .newsletter-section h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+        
+        #newsletterCategories {
+            margin-left: 30px;
+            margin-top: 10px;
+            padding-left: 10px;
+            border-left: 3px solid #0066cc;
+        }
+        
+        #newsletterCategories label {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        
+        #newsletterCategories input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        #newsletterCategories.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -99,20 +152,27 @@
 
                             <!-- Bloc Newsletter -->
                             <div class="newsletter-section">
-                                <h4>Recevoir la newsletter</h4>
+                                <h4>📧 Newsletter</h4>
                                 <label class="checkbox-label">
-                                    <input type="checkbox" id="newsletterConsent" name="newsletterConsent" checked />
-                                    Je souhaite recevoir des informations (newsletter)
+                                    <input type="checkbox" id="newsletterConsent" name="newsletterConsent" />
+                                    Je souhaite recevoir la newsletter des Jeux Olympiques 2024
                                 </label>
-                                <div id="newsletterCategories" style="display: block; margin-left: 20px; margin-top: 10px;">
-                                    <label style="display: block; margin: 5px 0;">
-                                        <input type="checkbox" name="category_sport" /> Sports
+                                
+                                <div id="newsletterCategories" style="display: none;">
+                                    <p style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                        Sélectionnez les catégories qui vous intéressent :
+                                    </p>
+                                    <label>
+                                        <input type="checkbox" name="category_sport" id="category_sport" />
+                                        🏅 Sports et compétitions
                                     </label>
-                                    <label style="display: block; margin: 5px 0;">
-                                        <input type="checkbox" name="category_evenements" /> Événements
+                                    <label>
+                                        <input type="checkbox" name="category_evenements" id="category_evenements" />
+                                        🎪 Événements et actualités
                                     </label>
-                                    <label style="display: block; margin: 5px 0;">
-                                        <input type="checkbox" name="category_billets" /> Offres billets
+                                    <label>
+                                        <input type="checkbox" name="category_billets" id="category_billets" />
+                                        🎟️ Offres spéciales billets
                                     </label>
                                 </div>
                             </div>
@@ -181,14 +241,14 @@
     <script>
         // Chargement immédiat du header et footer
         (async function() {
-            console.log('🚀 Chargement header/footer...');
+            console.log('Chargement header/footer...');
             
             try {
                 // Charger header
                 const headerResponse = await fetch('/header.html');
                 if (headerResponse.ok) {
                     document.getElementById('header-container').innerHTML = await headerResponse.text();
-                    console.log('✅ Header chargé');
+                    console.log('Header chargé');
                     
                     // Mettre à jour le compteur panier après chargement du header
                     setTimeout(() => {
@@ -199,19 +259,19 @@
                         }
                     }, 100);
                 } else {
-                    console.error('❌ Header non trouvé:', headerResponse.status);
+                    console.error('Header non trouvé:', headerResponse.status);
                 }
                 
                 // Charger footer
                 const footerResponse = await fetch('/footer.html');
                 if (footerResponse.ok) {
                     document.getElementById('footer-container').innerHTML = await footerResponse.text();
-                    console.log('✅ Footer chargé');
+                    console.log('Footer chargé');
                 } else {
-                    console.error('❌ Footer non trouvé:', footerResponse.status);
+                    console.error('Footer non trouvé:', footerResponse.status);
                 }
             } catch (error) {
-                console.error('❌ Erreur chargement:', error);
+                console.error('Erreur chargement:', error);
             }
         })();
         

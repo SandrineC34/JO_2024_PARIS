@@ -102,22 +102,32 @@
 
                         <!-- Section Paramètres -->
                         <section id="settings" class="section">
-                            <h2>Paramètres du compte</h2>
+                            <h2>⚙️ Paramètres du compte</h2>
                             <p>Gérez vos informations personnelles et votre sécurité</p>
-                            <h3>Préférences Newsletter</h3>
-                            <form id="newsletterForm" onsubmit="saveNewsletterPreferences(event)">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="newsletterAbonne" name="newsletterAbonne">
-                                    Recevoir la newsletter hebdomadaire (lundi 8h)
-                                </label>
-                                
-                                <div id="categoriesSection">
-                                    <h4>Catégories d'épreuves :</h4>
-                                    <!-- Checkboxes pour chaque catégorie -->
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                            </form>
+
+                            <!-- ✅ NEWSLETTER EN PREMIER -->
+                            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+                                <h3 style="margin-top: 0;">📧 Préférences Newsletter</h3>
+                                <form id="newsletterForm" onsubmit="saveNewsletterPreferences(event)">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="newsletterAbonne" name="newsletterAbonne">
+                                        <span style="font-weight: 500;">Recevoir la newsletter hebdomadaire (chaque lundi à 8h)</span>
+                                    </label>
+                                    
+                                    <div id="categoriesSection" style="margin-top: 15px;">
+                                        <!-- Rempli dynamiquement par JS -->
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary" style="margin-top: 15px;">
+                                        💾 Sauvegarder mes préférences
+                                    </button>
+                                </form>
+                            </div>
+
+                            <hr style="margin: 40px 0; border: 1px solid #dee2e6;">
+
+                            <!-- PROFIL -->
+                            <h3>👤 Informations personnelles</h3>
 
                             <!-- Loader -->
                             <div id="settingsLoader" class="loader">
@@ -150,10 +160,10 @@
                                 </button>
                             </form>
 
-                            <hr style="margin: 40px 0; border: 1px solid #e9ecef;">
+                            <hr style="margin: 40px 0; border: 1px solid #dee2e6;">
 
                             <!-- Changement de mot de passe -->
-                            <h3 style="color: #004e92; margin-bottom: 20px;">🔒 Changer le mot de passe</h3>
+                            <h3>🔒 Changer le mot de passe</h3>
                             <form class="settings-form" onsubmit="changePassword(event)">
                                 <div class="form-group">
                                     <label for="currentPassword">Mot de passe actuel *</label>
@@ -186,7 +196,7 @@
                             </form>
 
                             <!-- RGPD -->
-                            <hr style="margin: 40px 0; border: 1px solid #e9ecef;">
+                            <hr style="margin: 40px 0; border: 1px solid #dee2e6;">
                             
                             <div class="rgpd-info">
                                 <h4>🛡️ Vos données personnelles (RGPD)</h4>
@@ -218,34 +228,41 @@
     <script>
         // Chargement immédiat du header et footer
         (async function() {
-            console.log('🚀 Chargement header/footer...');
+            console.log('Chargement header/footer...');
             
             try {
                 // Charger header
                 const headerResponse = await fetch('/header.html');
                 if (headerResponse.ok) {
                     document.getElementById('header-container').innerHTML = await headerResponse.text();
-                    console.log('✅ Header chargé');
+                    console.log('Header chargé');
                 } else {
-                    console.error('❌ Header non trouvé:', headerResponse.status);
+                    console.error('Header non trouvé:', headerResponse.status);
                 }
                 
                 // Charger footer
                 const footerResponse = await fetch('/footer.html');
                 if (footerResponse.ok) {
                     document.getElementById('footer-container').innerHTML = await footerResponse.text();
-                    console.log('✅ Footer chargé');
+                    console.log('Footer chargé');
                 } else {
-                    console.error('❌ Footer non trouvé:', footerResponse.status);
+                    console.error('Footer non trouvé:', footerResponse.status);
                 }
             } catch (error) {
-                console.error('❌ Erreur chargement:', error);
+                console.error('Erreur chargement:', error);
             }
         })();
+        
+        // Fonction pour le menu mobile
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            if (navMenu) {
+                navMenu.classList.toggle('active');
+            }
+        }
     </script>
     
-    <!-- Scripts externes -->
     <script src="/js/common.js"></script>
-    <script src="/js/accueil.js"></script>
+    <script src="/js/compte.js"></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+FROM alpine:latest
+
+RUN apk add --no-cache curl bash tzdata
+
+# Copie du script
+WORKDIR /app
+COPY scheduler/send-newsletter.sh /app/send-newsletter.sh
+RUN chmod +x /app/send-newsletter.sh
+
+# Configuration du cron
+RUN echo "*/5 * * * * /app/send-newsletter.sh >> /var/log/scheduler/cron.log 2>&1" > /etc/crontabs/root
+
+CMD ["crond", "-f", "-l", "2"]
+

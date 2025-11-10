@@ -1,0 +1,2 @@
+# minute hour day month day-of-week user command
+12 * * * root /usr/local/bin/send_now.sh http://api:80 ${NEWSLETTER_API_TOKEN} >> /var/log/scheduler/cron.log 2>&1
