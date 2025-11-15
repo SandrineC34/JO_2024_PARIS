@@ -1,5 +1,24 @@
 // js/common.js - Fonctionnalités communes (structure frontend/)
 
+// --- VARIABLES GLOBALES ---
+// Centralise les infos réutilisées dans tout le site
+const SITE_INFO = {
+    siteName: "SportTickets jo2024",
+    siteURL: "https://www.sporttickets-jo2024.fr",
+    organizerName: "SportEvents France",
+    organizerEmail: "contact@sportevents.fr",
+    organizerPhone: "+33 1 23 45 67 89",
+    organizerAddress: "12 rue des Champions, 75000 Paris, France",
+    organizerLegal: "SARL au capital de 20 000 € - SIRET 51234567800012 - RCS Paris",
+    paymentProvider: "Stripe",
+    hostName: "Hebergeur",
+    hostURL: "https://www.hebergeur.com",
+    hostAddress: "2 rue Kellermann, 59100 Roubaix, France",
+    hostPhone: "+33 9 72 10 10 07",
+    year: new Date().getFullYear()
+};
+
+
 // Menu mobile
 function toggleMenu() {
     const navMenu = document.getElementById('navMenu');
@@ -35,6 +54,16 @@ async function loadHTML(elementId, filePath) {
     } catch (error) {
         console.error(`❌ Erreur lors du chargement de ${filePath}:`, error);
     }
+}
+
+
+// --- REMPLACE LES VARIABLES DANS LE HTML ---
+function replaceTemplateVars(container = document) {
+    const html = container.innerHTML;
+    container.innerHTML = html.replace(/\{\{(.*?)\}\}/g, (match, key) => {
+        const trimmedKey = key.trim();
+        return SITE_INFO[trimmedKey] !== undefined ? SITE_INFO[trimmedKey] : match;
+    });
 }
 
 // Fonction pour mettre à jour le compteur de panier

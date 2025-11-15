@@ -9,12 +9,10 @@ public class NewsletterCategoriesDto
     /// Catégorie Sports (actualités sportives, résultats, etc.)
     /// </summary>
     public bool Sports { get; set; }
-    
     /// <summary>
     /// Catégorie Événements (cérémonies, événements spéciaux, etc.)
     /// </summary>
     public bool Evenements { get; set; }
-    
     /// <summary>
     /// Catégorie Offres billets (promotions, nouvelles offres, etc.)
     /// </summary>

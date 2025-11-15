@@ -6,8 +6,6 @@ namespace JO2024.Core.DTOs.Newsletter;
 public class UnsubscribeResponseDto
 {
     public bool Success { get; set; }
-    
     public string Message { get; set; } = string.Empty;
-    
     public DateTime? DateDesabonnement { get; set; }
 }

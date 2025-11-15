@@ -71,11 +71,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=Server=mysql;Database=${MYSQL_DATABASE:-jo2024_db};User=${MYSQL_USER:-jo2024_user};Password=${MYSQL_PASSWORD:-JO2024Pass123!};
-      - Jwt__Key=${JWT_KEY}
+      - Jwt__Key=${JWT_KEY:-DefaultJwtKeyForDevChangeMe}
       - Jwt__Issuer=${JWT_ISSUER:-JO2024.API}
       - Jwt__Audience=${JWT_AUDIENCE:-JO2024.Client}
-      - Newsletter__ApiToken=${NEWSLETTER_API_TOKEN}
-      # Configuration SMTP (utilise variables .env)
+      - Newsletter__ApiToken=${NEWSLETTER_API_TOKEN:-}
       - Email__SmtpHost=${SMTP_HOST:-mailhog}
       - Email__SmtpPort=${SMTP_PORT:-1025}
       - Email__SmtpUser=${SMTP_USER:-}
@@ -103,6 +102,7 @@ services:
     restart: always
     ports:
       - "3000:80"
+    # Monter tout le dossier frontend pour que les modifications locales soient visibles immédiatement
     volumes:
       - ./frontend/html:/usr/share/nginx/html
       - ./frontend/css:/usr/share/nginx/css
@@ -114,7 +114,7 @@ services:
       - jo2024_network
 
   # ============================================
-  # SCHEDULER NEWSLETTER (Alpine + Cron +  rapport)
+  # SCHEDULER NEWSLETTER (Alpine + Cron + rapport)
   # ============================================
   scheduler:
     build:
@@ -124,7 +124,7 @@ services:
     restart: always
     environment:
       - API_URL=http://api:80
-      - NEWSLETTER_API_TOKEN=${NEWSLETTER_API_TOKEN}
+      - NEWSLETTER_API_TOKEN=${NEWSLETTER_API_TOKEN:-}
       - TZ=Europe/Paris
     depends_on:
       - api

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Jeux Olympiques 2024</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: #004e92;
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+        }
+
+        /* Section Formulaire */
+        .form-section {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-section h2 {
+            color: #004e92;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #009ffd;
+            box-shadow: 0 0 0 3px rgba(0, 159, 253, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            display: none;
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .message {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 78, 146, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password a {
+            color: #009ffd;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .switch-form a {
+            color: #009ffd;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .password-requirements {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #ffc107;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Newsletter Section */
+        .newsletter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .newsletter-section h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        #newsletterCategories {
+            margin-left: 30px;
+            margin-top: 10px;
+            padding-left: 10px;
+            border-left: 3px solid #0066cc;
+            display: none;
+        }
+
+        #newsletterCategories label {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        #sportsSubcategories {
+            margin-left: 30px;
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid #28a745;
+            background: #f0fff4;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .rgpd-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #004e92 0%, #009ffd 100%);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .olympic-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #009ffd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+            }
+            .welcome-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">🏅 JO 2024</div>
+    </header>
+
+    <main class="main-content">
+        <div class="auth-container">
+            <div class="form-section">
+                <div class="message success" id="successMessage"></div>
+                <div class="message error" id="errorMessage"></div>
+                
+                <div class="loading" id="loadingSection">
+                    <div class="loading-spinner"></div>
+                    <p>Connexion en cours...</p>
+                </div>
+
+                <!-- Formulaire de Connexion -->
+                <div id="loginForm">
+                    <h2>Connexion</h2>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">Email *</label>
+                            <input type="email" id="loginEmail" required>
+                            <div class="error-message" id="loginEmailError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword">Mot de passe *</label>
+                            <input type="password" id="loginPassword" required>
+                            <div class="error-message" id="loginPasswordError"></div>
+                        </div>
+
+                        <button type="submit" class="btn">Se connecter</button>
+                    </form>
+
+                    <div class="forgot-password">
+                        <a href="#" onclick="showForgotPassword(); return false;">Mot de passe oublié ?</a>
+                    </div>
+
+                    <div class="switch-form">
+                        <p>Pas encore de compte ? <a href="#" onclick="showRegisterForm(); return false;">Créer un compte</a></p>
+                    </div>
+                </div>
+
+                <!-- Formulaire d'Inscription -->
+                <div id="registerForm" style="display: none;">
+                    <h2>Créer un compte</h2>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="firstName">Prénom *</label>
+                            <input type="text" id="firstName" required>
+                            <div class="error-message" id="firstNameError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lastName">Nom *</label>
+                            <input type="text" id="lastName" required>
+                            <div class="error-message" id="lastNameError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerEmail">Email *</label>
+                            <input type="email" id="registerEmail" required>
+                            <div class="error-message" id="registerEmailError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPassword">Mot de passe *</label>
+                            <input type="password" id="registerPassword" required oninput="checkPasswordStrength()">
+                            <div class="password-requirements">
+                                Le mot de passe doit contenir :
+                                <br>• Minimum 8 caractères
+                                <br>• Au moins une majuscule
+                                <br>• Au moins une minuscule  
+                                <br>• Au moins un chiffre
+                                <br>• Au moins un caractère spécial (!@#$%^&*)
+                            </div>
+                            <div class="error-message" id="registerPasswordError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmer le mot de passe *</label>
+                            <input type="password" id="confirmPassword" required>
+                            <div class="error-message" id="confirmPasswordError"></div>
+                        </div>
+
+                        <!-- Newsletter -->
+                        <div class="newsletter-section">
+                            <h4>📧 Newsletter</h4>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="newsletterConsent" />
+                                Je souhaite recevoir la newsletter des Jeux Olympiques 2024
+                            </label>
+                            
+                            <div id="newsletterCategories">
+                                <p style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                    Sélectionnez les catégories qui vous intéressent :
+                                </p>
+                                
+                                <div style="margin-bottom: 10px;">
+                                    <label class="checkbox-label" style="background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+                                        <input type="checkbox" id="category_sport" />
+                                        🏅 Sports et compétitions
+                                    </label>
+                                    
+                                    <div id="sportsSubcategories">
+                                        <p style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">
+                                            Choisissez vos sports favoris :
+                                        </p>
+                                        
+                                        <label style="display: block; margin: 6px 0;">
+                                            <input type="checkbox" id="sport_natation" />
+                                            🏊 Natation
+                                        </label>
+                                        
+                                        <label style="display: block; margin: 6px 0;">
+                                            <input type="checkbox" id="sport_athletisme" />
+                                            🏃 Athlétisme
+                                        </label>
+                                        
+                                        <label style="display: block; margin: 6px 0;">
+                                            <input type="checkbox" id="sport_basketball" />
+                                            🏀 Basketball
+                                        </label>
+                                        
+                                        <label style="display: block; margin: 6px 0;">
+                                            <input type="checkbox" id="sport_surf" />
+                                            🏄 Surf
+                                        </label>
+                                        
+                                        <label style="display: block; margin: 6px 0;">
+                                            <input type="checkbox" id="sport_gymnastique" />
+                                            🤸 Gymnastique
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <label class="checkbox-label" style="background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+                                    <input type="checkbox" id="category_evenements" />
+                                    🎪 Événements et actualités
+                                </label>
+                                
+                                <label class="checkbox-label" style="background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+                                    <input type="checkbox" id="category_billets" />
+                                    🎟️ Offres spéciales billets
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- RGPD -->
+                        <div class="rgpd-section">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="rgpdConsent" required />
+                                J'accepte la politique de confidentialité *
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn" id="registerBtn">Créer mon compte</button>
+                    </form>
+
+                    <div class="switch-form">
+                        <p>Déjà un compte ? <a href="#" onclick="showLoginForm(); return false;">Se connecter</a></p>
+                    </div>
+                </div>
+
+                <!-- Mot de Passe Oublié -->
+                <div id="forgotPasswordForm" style="display: none;">
+                    <h2>Mot de passe oublié</h2>
+                    <p style="margin-bottom: 20px; color: #666;">
+                        Saisissez votre adresse email pour recevoir un lien de réinitialisation.
+                    </p>
+                    <form onsubmit="handleForgotPassword(event)">
+                        <div class="form-group">
+                            <label for="forgotEmail">Email *</label>
+                            <input type="email" id="forgotEmail" required>
+                            <div class="error-message" id="forgotEmailError"></div>
+                        </div>
+
+                        <button type="submit" class="btn">Envoyer le lien</button>
+                    </form>
+
+                    <div class="switch-form">
+                        <p><a href="#" onclick="showLoginForm(); return false;">Retour à la connexion</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-section">
+                <div class="olympic-icon">🏅</div>
+                <h3>Bienvenue aux JO 2024</h3>
+                <p>
+                    Rejoignez l'aventure olympique et vivez des moments inoubliables ! 
+                    Créez votre compte pour réserver vos billets en toute sécurité et 
+                    profiter d'une expérience personnalisée.
+                </p>
+                <p style="margin-top: 20px; font-weight: bold;">
+                    ✓ Billets sécurisés avec QR codes<br>
+                    ✓ Téléchargement immédiat<br>
+                    ✓ Support client dédié
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('jo_users') || '[]');
+        let currentUser = JSON.parse(localStorage.getItem('jo_current_user') || 'null');
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeNewsletterToggle();
+            initializeSportsToggle();
+        });
+
+        function initializeNewsletterToggle() {
+            const newsletterConsent = document.getElementById('newsletterConsent');
+            const newsletterCategories = document.getElementById('newsletterCategories');
+
+            if (newsletterConsent && newsletterCategories) {
+                newsletterConsent.checked = false;
+                newsletterCategories.style.display = 'none';
+
+                newsletterConsent.addEventListener('change', function() {
+                    if (this.checked) {
+                        newsletterCategories.style.display = 'block';
+                    } else {
+                        newsletterCategories.style.display = 'none';
+                        document.querySelectorAll('[id^="category_"]').forEach(cb => cb.checked = false);
+                        document.getElementById('sportsSubcategories').style.display = 'none';
+                        document.querySelectorAll('[id^="sport_"]').forEach(cb => cb.checked = false);
+                    }
+                });
+            }
+        }
+
+        function initializeSportsToggle() {
+            const categorySport = document.getElementById('category_sport');
+            const sportsSubcategories = document.getElementById('sportsSubcategories');
+
+            if (categorySport && sportsSubcategories) {
+                sportsSubcategories.style.display = 'none';
+
+                categorySport.addEventListener('change', function() {
+                    if (this.checked) {
+                        sportsSubcategories.style.display = 'block';
+                    } else {
+                        sportsSubcategories.style.display = 'none';
+                        document.querySelectorAll('[id^="sport_"]').forEach(cb => cb.checked = false);
+                    }
+                });
+            }
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            clearMessages();
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            clearMessages();
+        }
+
+        function showForgotPassword() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+            clearMessages();
+        }
+
+        function clearMessages() {
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+        }
+
+        function showMessage(type, message) {
+            const messageEl = document.getElementById(type + 'Message');
+            messageEl.textContent = message;
+            messageEl.style.display = 'block';
+            messageEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showFieldError(fieldName, message) {
+            const errorEl = document.getElementById(fieldName + 'Error');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function validatePassword(password) {
+            return {
+                isValid: password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password) && /[!@#$%^&*]/.test(password)
+            };
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('registerPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
+            
+            if (password.length === 0) {
+                registerBtn.disabled = false;
+                return;
+            }
+
+            const validation = validatePassword(password);
+            registerBtn.disabled = !validation.isValid;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            clearMessages();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(u => u.email === email);
+            
+            if (!user) {
+                showFieldError('loginEmail', 'Aucun compte trouvé avec cet email');
+                return;
+            }
+
+            if (user.password !== password) {
+                showFieldError('loginPassword', 'Mot de passe incorrect');
+                return;
+            }
+
+            currentUser = user;
+            localStorage.setItem('jo_current_user', JSON.stringify(currentUser));
+            showMessage('success', `Bienvenue ${user.firstName} ! Connexion réussie.`);
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            clearMessages();
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showFieldError('confirmPassword', 'Les mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (!validatePassword(password).isValid) {
+                showFieldError('registerPassword', 'Le mot de passe ne respecte pas les critères');
+                return;
+            }
+
+            if (!document.getElementById('rgpdConsent').checked) {
+                showMessage('error', 'Vous devez accepter la politique de confidentialité');
+                return;
+            }
+
+            const newsletterConsent = document.getElementById('newsletterConsent').checked;
+            let selectedSports = [];
+            
+            if (newsletterConsent && document.getElementById('category_sport').checked) {
+                ['sport_natation', 'sport_athletisme', 'sport_basketball', 'sport_surf', 'sport_gymnastique'].forEach(id => {
+                    const cb = document.getElementById(id);
+                    if (cb && cb.checked) {
+                        selectedSports.push(id.replace('sport_', ''));
+                    }
+                });
+            }
+
+            const newUser = {
+                id: 'user_' + Date.now(),
+                firstName,
+                lastName,
+                email,
+                password,
+                newsletter: {
+                    subscribed: newsletterConsent,
+                    categories: {
+                        sport: newsletterConsent && document.getElementById('category_sport')?.checked,
+                        evenements: newsletterConsent && document.getElementById('category_evenements')?.checked,
+                        billets: newsletterConsent && document.getElementById('category_billets')?.checked
+                    },
+                    sports: selectedSports
+                },
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('jo_users', JSON.stringify(users));
+            
+            let msg = `Compte créé avec succès ${firstName} !`;
+            if (newsletterConsent) {
+                msg += ` Newsletter activée`;
+                if (selectedSports.length > 0) {
+                    msg += ` (Sports: ${selectedSports.join(', ')})`;
+                }
+            }
+            
+            showMessage('success', msg);
+            
+            setTimeout(() => {
+                showLoginForm();
+            }, 2000);
+        }
+
+        function handleForgotPassword(event) {
+            event.preventDefault();
+            clearMessages();
+            
+            const email = document.getElementById('forgotEmail').value.trim();
+            const user = users.find(u => u.email === email);
+            
+            if (!user) {
+                showFieldError('forgotEmail', 'Aucun compte trouvé avec cet email');
+                return;
+            }
+
+            showMessage('success', `Un lien de réinitialisation a été envoyé à ${email}`);
+            
+            setTimeout(() => {
+                showLoginForm();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

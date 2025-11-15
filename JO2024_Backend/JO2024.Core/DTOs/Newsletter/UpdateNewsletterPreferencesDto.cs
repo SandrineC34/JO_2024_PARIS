@@ -9,7 +9,6 @@ public class UpdateNewsletterPreferencesDto
 {
     [Required(ErrorMessage = "Le statut d'abonnement est requis")]
     public bool EstAbonne { get; set; }
-    
     [Required(ErrorMessage = "Les catégories sont requises")]
     public NewsletterCategoriesDto Categories { get; set; } = new();
 }

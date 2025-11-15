@@ -71,6 +71,9 @@ async function loadUserData() {
         showError('Impossible de charger vos données');
     }
 }
+// ===========================
+// Gestion des billets (tickets)
+// ===========================
 
 async function loadTickets() {
     const loader = document.getElementById('ticketsLoader');
@@ -281,9 +284,9 @@ function fillProfileForm(profile) {
 }
 
 // ===========================
-// ⭐ NOUVEAU: GESTION NEWSLETTER
+// NEWSLETTER LOGIQUE COMPLETE
 // ===========================
-
+// Chargement préférences Newsletter
 async function loadNewsletterPreferences() {
     try {
         const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
@@ -315,6 +318,7 @@ async function loadNewsletterPreferences() {
     }
 }
 
+// Affichage du formulaire Newsletter
 function displayNewsletterForm() {
     const newsletterAbonne = document.getElementById('newsletterAbonne');
     const categoriesSection = document.getElementById('categoriesSection');
@@ -324,35 +328,183 @@ function displayNewsletterForm() {
     // Remplir le formulaire
     newsletterAbonne.checked = newsletterPreferences?.estAbonne || false;
     
-    // Créer les checkboxes de catégories
+    // Créer les checkboxes de catégories avec sports détaillés
     if (categoriesSection) {
         categoriesSection.innerHTML = `
-            <h4>Catégories d'épreuves :</h4>
-            <div style="margin-left: 20px;">
-                <label class="checkbox-label" style="display: block; margin: 10px 0;">
+            <h4 style="margin-bottom: 15px; color: #333;">Catégories d'intérêt :</h4>
+            <div style="margin-bottom: 15px;">
+                <label class="checkbox-label" style="display: block; margin: 10px 0; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
                     <input type="checkbox" id="category_sport" name="category_sport" 
                         ${newsletterPreferences?.categories?.sports ? 'checked' : ''}>
-                    🏃 Sports
+                    <span style="font-weight: 500;">🏅 Sports et compétitions</span>
                 </label>
-                <label class="checkbox-label" style="display: block; margin: 10px 0;">
-                    <input type="checkbox" id="category_evenements" name="category_evenements"
-                        ${newsletterPreferences?.categories?.evenements ? 'checked' : ''}>
-                    🎉 Événements
-                </label>
-                <label class="checkbox-label" style="display: block; margin: 10px 0;">
-                    <input type="checkbox" id="category_billets" name="category_billets"
-                        ${newsletterPreferences?.categories?.billets ? 'checked' : ''}>
-                    🎫 Offres billets
-                </label>
+                <div id="sportsSubcategories" style="display: ${newsletterPreferences?.categories?.sports ? 'block' : 'none'}; margin-left: 30px; padding: 15px; background: #f0fff4; border-left: 3px solid #28a745; border-radius: 6px;">
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;">
+                        Sélectionnez vos sports favoris :
+                    </p>
+                    <label style="display: block; margin: 8px 0; cursor: pointer;">
+                        <input type="checkbox" id="sport_natation" name="sport_natation"
+                            ${hasSport('natation') ? 'checked' : ''}>
+                        🏊 Natation
+                    </label>
+                    <label style="display: block; margin: 8px 0; cursor: pointer;">
+                        <input type="checkbox" id="sport_athletisme" name="sport_athletisme"
+                            ${hasSport('athletisme') ? 'checked' : ''}>
+                        🏃 Athlétisme
+                    </label>
+                    <label style="display: block; margin: 8px 0; cursor: pointer;">
+                        <input type="checkbox" id="sport_basketball" name="sport_basketball"
+                            ${hasSport('basketball') ? 'checked' : ''}>
+                        🏀 Basketball
+                    </label>
+                    <label style="display: block; margin: 8px 0; cursor: pointer;">
+                        <input type="checkbox" id="sport_surf" name="sport_surf"
+                            ${hasSport('surf') ? 'checked' : ''}>
+                        🏄 Surf
+                    </label>
+                    <label style="display: block; margin: 8px 0; cursor: pointer;">
+                        <input type="checkbox" id="sport_gymnastique" name="sport_gymnastique"
+                            ${hasSport('gymnastique') ? 'checked' : ''}>
+                        🤸 Gymnastique
+                    </label>
+                </div>
             </div>
+            <label class="checkbox-label" style="display: block; margin: 10px 0; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <input type="checkbox" id="category_evenements" name="category_evenements"
+                    ${newsletterPreferences?.categories?.evenements ? 'checked' : ''}>
+                <span style="font-weight: 500;">🎉 Événements et actualités</span>
+            </label>
+            <label class="checkbox-label" style="display: block; margin: 10px 0; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <input type="checkbox" id="category_billets" name="category_billets"
+                    ${newsletterPreferences?.categories?.billets ? 'checked' : ''}>
+                <span style="font-weight: 500;">🎫 Offres spéciales billets</span>
+            </label>
         `;
-        
-        // Afficher/masquer les catégories selon l'abonnement
         updateCategoriesVisibility();
+        setupSportsToggle();
     }
-    
-    // Gérer le toggle de l'abonnement
     newsletterAbonne.addEventListener('change', updateCategoriesVisibility);
+}
+
+function hasSport(sportId) {
+    if (!newsletterPreferences?.sports || !Array.isArray(newsletterPreferences.sports)) {
+        return false;
+    }
+    return newsletterPreferences.sports.some(sport => sport.id === sportId);
+}
+
+function setupSportsToggle() {
+    const categorySport = document.getElementById('category_sport');
+    const sportsSubcategories = document.getElementById('sportsSubcategories');
+    if (!categorySport || !sportsSubcategories) return;
+    categorySport.addEventListener('change', function() {
+        const isChecked = this.checked;
+        sportsSubcategories.style.display = isChecked ? 'block' : 'none';
+        document.querySelectorAll('[name^="sport_"]').forEach(cb => {
+            cb.disabled = !isChecked;
+            if (!isChecked) cb.checked = false;
+        });
+    });
+    const categoryIsChecked = categorySport.checked;
+    document.querySelectorAll('[name^="sport_"]').forEach(cb => {
+        cb.disabled = !categoryIsChecked;
+    });
+}
+
+function updateCategoriesVisibility() {
+    const newsletterAbonne = document.getElementById('newsletterAbonne');
+    const categoriesSection = document.getElementById('categoriesSection');
+    const categoryInputs = categoriesSection?.querySelectorAll('input[type="checkbox"]:not([name^="sport_"])');
+    const sportInputs = document.querySelectorAll('[name^="sport_"]');
+    const categorySport = document.getElementById('category_sport');
+    if (!newsletterAbonne || !categoriesSection) return;
+    const isSubscribed = newsletterAbonne.checked;
+    if (categoryInputs) {
+        categoryInputs.forEach(input => {
+            input.disabled = !isSubscribed;
+            input.closest('label').style.opacity = isSubscribed ? '1' : '0.5';
+        });
+    }
+    if (sportInputs && categorySport) {
+        const sportCategoryChecked = isSubscribed && categorySport.checked;
+        sportInputs.forEach(input => {
+            input.disabled = !sportCategoryChecked;
+        });
+    }
+    if (!isSubscribed) {
+        if (categoryInputs) {
+            categoryInputs.forEach(input => input.checked = false);
+        }
+        if (sportInputs) {
+            sportInputs.forEach(input => input.checked = false);
+        }
+        const sportsSubcategories = document.getElementById('sportsSubcategories');
+        if (sportsSubcategories) {
+            sportsSubcategories.style.display = 'none';
+        }
+    }
+}
+
+// Sauvegarde des préférences Newsletter
+async function saveNewsletterPreferences(event) {
+    event.preventDefault();
+    const newsletterAbonne = document.getElementById('newsletterAbonne');
+    const estAbonne = newsletterAbonne?.checked || false;
+    const categorySport = document.getElementById('category_sport')?.checked || false;
+    const categoryEvenements = document.getElementById('category_evenements')?.checked || false;
+    const categoryBillets = document.getElementById('category_billets')?.checked || false;
+    let selectedSports = [];
+    if (estAbonne && categorySport) {
+        const sportsMap = {
+            'sport_natation': 'Natation',
+            'sport_athletisme': 'Athlétisme',
+            'sport_basketball': 'Basketball',
+            'sport_surf': 'Surf',
+            'sport_gymnastique': 'Gymnastique'
+        };
+        Object.keys(sportsMap).forEach(sportId => {
+            const checkbox = document.getElementById(sportId);
+            if (checkbox && checkbox.checked) {
+                selectedSports.push({
+                    id: sportId.replace('sport_', ''),
+                    name: sportsMap[sportId]
+                });
+            }
+        });
+    }
+    const updateDto = {
+        estAbonne: estAbonne,
+        categories: {
+            sports: estAbonne && categorySport,
+            evenements: estAbonne && categoryEvenements,
+            billets: estAbonne && categoryBillets
+        },
+        sports: selectedSports
+    };
+    try {
+        const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(updateDto)
+        });
+        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+        const result = await response.json();
+        if (estAbonne) {
+            let msg = 'Préférences mises à jour ! ';
+            if (selectedSports.length > 0) {
+                const sportsNames = selectedSports.map(s => s.name).join(', ');
+                msg += `\nSports suivis : ${sportsNames}`;
+            }
+            showSuccess(msg);
+        } else {
+            showSuccess('Vous avez été désinscrit de la newsletter.');
+        }
+        await loadNewsletterPreferences();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible de mettre à jour vos préférences newsletter');
+    }
 }
 
 function updateCategoriesVisibility() {
@@ -411,9 +563,9 @@ async function saveNewsletterPreferences(event) {
         
         // Message personnalisé
         if (estAbonne) {
-            showSuccess('✅ Préférences mises à jour ! Vous recevrez la newsletter selon vos choix.');
+            showSuccess('Préférences mises à jour ! Vous recevrez la newsletter selon vos choix.');
         } else {
-            showSuccess('✅ Vous avez été désinscrit de la newsletter.');
+            showSuccess('Vous avez été désinscrit de la newsletter.');
         }
         
         // Recharger les préférences
@@ -423,6 +575,9 @@ async function saveNewsletterPreferences(event) {
         showError('Impossible de mettre à jour vos préférences newsletter');
     }
 }
+
+
+
 
 // ===========================
 // ACTIONS SUR LES BILLETS
@@ -569,7 +724,7 @@ async function saveSettings(event) {
             throw new Error('Erreur lors de la mise à jour');
         }
         
-        showSuccess('✅ Informations mises à jour avec succès !');
+        showSuccess('Informations mises à jour avec succès !');
         
         await checkAuthentication();
     } catch (error) {
@@ -613,7 +768,7 @@ async function changePassword(event) {
             throw new Error(error.message || 'Erreur lors du changement de mot de passe');
         }
         
-        showSuccess('✅ Mot de passe modifié avec succès !');
+        showSuccess('Mot de passe modifié avec succès !');
         
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
@@ -665,7 +820,7 @@ async function downloadUserData() {
     }
 }
 
-// ⭐ MODIFICATION: Suppression de compte avec confirmation par email
+// Suppression de compte avec confirmation par email
 function confirmDeleteAccount() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +

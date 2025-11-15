@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schéma UX - Gestion Newsletter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+        
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .section {
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            background: linear-gradient(to right, #f8f9ff, #ffffff);
+            transition: all 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-stories {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .story {
+            background: white;
+            padding: 15px 20px;
+            border-left: 4px solid #764ba2;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .story:hover {
+            border-left-width: 8px;
+            padding-left: 16px;
+        }
+        
+        .story-text {
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .story-type {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .flow-arrow {
+            text-align: center;
+            font-size: 2em;
+            color: #667eea;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .rgpd-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+        
+        .danger-zone {
+            border-color: #dc3545 !important;
+            background: linear-gradient(to right, #fff5f5, #ffffff) !important;
+        }
+        
+        .danger-zone .section-title {
+            color: #dc3545;
+        }
+        
+        .danger-zone .icon {
+            background: #dc3545;
+        }
+        
+        .danger-zone .story {
+            border-left-color: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .section-title {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Parcours UX - Gestion Newsletter & Compte</h1>
+        
+        <div class="flow-container">
+            <!-- Section 1: Inscription -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="icon">1</div>
+                    Inscription avec Newsletter
+                </div>
+                <div class="user-stories">
+                    <div class="story">
+                        <div class="story-type">🎯 Création de compte</div>
+                        <div class="story-text">
+                            L'utilisateur peut <span class="highlight">créer un compte</span> via la page d'inscription pour accéder à son espace personnel
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">✅ Consentement initial</div>
+                        <div class="story-text">
+                            Option de réception des newsletter <span class="highlight">non cochée par défaut</span> - gestion libre du consentement
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">🎨 Personnalisation</div>
+                        <div class="story-text">
+                            Si l'option est cochée, sélection des <span class="highlight">catégories d'intérêt</span> : Sports, Événements, Offres billets
+                            <br>Si l'option Sport est cochée, sélection des <span class="highlight">sports d'intérêt</span> : Natation, Athlétisme, Baskeball, Surf, Gymnastique</br>
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">🔒 RGPD</div>
+                        <div class="story-text">
+                            Acceptation <span class="highlight">obligatoire</span> de la politique de confidentialité avant création du compte
+                            <br>Si non cochée note d'information quand clique sur créer mon compte, <span class="highlight">le compte ne se créer pas!</span>
+                            <br>Lien vers la page <span class="highlight">"Politique RGPD"</span> avec lien pour la désinscription</br>
+
+                                                  
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">📨 Confirmation</div>
+                        <div class="story-text">
+                            Email de confirmation incluant un <span class="highlight">lien de désinscription</span> pour retrait du consentement à tout moment
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Section 2: Modification -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="icon">2</div>
+                    Modification des préférences Newsletter
+                </div>
+                <div class="user-stories">
+                    <div class="story">
+                        <div class="story-type">⚙️ Accès aux paramètres</div>
+                        <div class="story-text">
+                            Navigation : <span class="highlight">Mon Compte → Paramètres</span> pour consulter le statut d'abonnement et les catégories
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">🔄 Mise à jour</div>
+                        <div class="story-text">
+                            Modification possible : activation, désactivation, changement de catégories pour une <span class="highlight">communication personnalisée</span>
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">✓ Feedback</div>
+                        <div class="story-text">
+                            Message de confirmation : <span class="highlight">« Préférences mises à jour »</span> après enregistrement
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Section 3: Désinscription -->
+            <div class="section">
+                <div class="section-title">
+                    <div class="icon">3</div>
+                    Désinscription de la Newsletter
+                </div>
+                <div class="user-stories">
+                    <div class="story">
+                        <div class="story-type">🚪 Désinscription depuis le compte</div>
+                        <div class="story-text">
+                            Décochage de <span class="highlight">« Recevoir la newsletter »</span> + enregistrement pour supprimer le consentement
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">📧 Désinscription depuis email</div>
+                        <div class="story-text">
+                            Clic sur <span class="highlight">« Se désabonner »</span> dans l'email → page dédiée → confirmation → arrêt immédiat des envois
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Section 4: Suppression compte -->
+            <div class="section danger-zone">
+                <div class="section-title">
+                    <div class="icon">⚠️</div>
+                    Suppression du compte (Danger Zone)
+                </div>
+                <div class="user-stories">
+                    <div class="story">
+                        <div class="story-type">🗑️ Suppression de compte</div>
+                        <div class="story-text">
+                            Accès depuis la section <span class="highlight">« Danger Zone »</span> pour effacer toutes les données personnelles
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">⚠️ Information claire</div>
+                        <div class="story-text">
+                            Avertissement <span class="highlight">avant confirmation</span> : toutes les données seront supprimées définitivement
+                        </div>
+                    </div>
+                    <div class="story">
+                        <div class="story-type">📬 Confirmation finale</div>
+                        <div class="story-text">
+                            Email de confirmation de suppression pour <span class="highlight">assurer la traçabilité</span> de l'action
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

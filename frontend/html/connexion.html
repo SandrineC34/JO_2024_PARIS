@@ -162,26 +162,69 @@
                                     <p style="font-size: 14px; color: #666; margin-bottom: 8px;">
                                         Sélectionnez les catégories qui vous intéressent :
                                     </p>
-                                    <label>
-                                        <input type="checkbox" name="category_sport" id="category_sport" />
-                                        🏅 Sports et compétitions
-                                    </label>
-                                    <label>
+                                    
+                                    <!-- Catégorie Sports avec sous-catégories -->
+                                    <div style="margin-bottom: 10px;">
+                                        <label class="checkbox-label" style="background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+                                            <input type="checkbox" name="category_sport" id="category_sport" />
+                                            🏅 Sports et compétitions
+                                        </label>
+                                        
+                                        <!-- Sports spécifiques (Niveau 3) -->
+                                        <div id="sportsSubcategories" style="display: none; margin-left: 30px; margin-top: 10px; padding: 10px; border-left: 3px solid #28a745; background: #f0fff4; border-radius: 4px;">
+                                            <p style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">
+                                                Choisissez vos sports favoris :
+                                            </p>
+                                            
+                                            <label style="display: block; margin: 6px 0;">
+                                                <input type="checkbox" name="sport_natation" id="sport_natation" />
+                                                🏊 Natation
+                                            </label>
+                                            
+                                            <label style="display: block; margin: 6px 0;">
+                                                <input type="checkbox" name="sport_athletisme" id="sport_athletisme" />
+                                                🏃 Athlétisme
+                                            </label>
+                                            
+                                            <label style="display: block; margin: 6px 0;">
+                                                <input type="checkbox" name="sport_basketball" id="sport_basketball" />
+                                                🏀 Basketball
+                                            </label>
+                                            
+                                            <label style="display: block; margin: 6px 0;">
+                                                <input type="checkbox" name="sport_surf" id="sport_surf" />
+                                                🏄 Surf
+                                            </label>
+                                            
+                                            <label style="display: block; margin: 6px 0;">
+                                                <input type="checkbox" name="sport_gymnastique" id="sport_gymnastique" />
+                                                🤸 Gymnastique
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Catégorie Événements -->
+                                    <label class="checkbox-label" style="background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
                                         <input type="checkbox" name="category_evenements" id="category_evenements" />
                                         🎪 Événements et actualités
                                     </label>
-                                    <label>
+                                    
+                                    <!-- Catégorie Billets -->
+                                    <label class="checkbox-label" style="background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
                                         <input type="checkbox" name="category_billets" id="category_billets" />
                                         🎟️ Offres spéciales billets
                                     </label>
                                 </div>
                             </div>
 
+
+
+
                             <!-- Bloc RGPD -->
                             <div class="rgpd-section" style="margin-top: 15px;">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="rgpdConsent" name="rgpdConsent" required />
-                                    J'accepte la <a href="politique-confidentialite.html" target="_blank">politique de confidentialité</a> *
+                                    J'accepte la <a href="rgpd.html" target="_blank">politique de confidentialité</a> *
                                 </label>
                             </div>
 
