@@ -1,5 +1,5 @@
 // ============================================
-// AdminService.cs
+// AdminService.cs - CORRECTION DE LA TYPO
 // JO2024.Core/Services/AdminService.cs
 // ============================================
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +16,14 @@ namespace JO2024.Core.Services;
 
 public class AdminService : IAdminService
 {
+    // ✅ CORRECTION : IUtilisateurRepository (avec majuscule)
     private readonly IUtilisateurRepository _utilisateurRepository;
     private readonly IOffreRepository _offreRepository;
     private readonly ICommandeRepository _commandeRepository;
     private readonly IBilletRepository _billetRepository;
 
     public AdminService(
-        IUtilisateurRepository utilisateurRepository,
+        IUtilisateurRepository utilisateurRepository, // ✅ Majuscule
         IOffreRepository offreRepository,
         ICommandeRepository commandeRepository,
         IBilletRepository billetRepository)
@@ -65,8 +66,8 @@ public class AdminService : IAdminService
                 EstActif = user.EstActif,
                 DateCreation = user.DateCreation,
                 DerniereConnexion = user.DerniereConnexion,
-                NombreCommandes = userWithDetails?.Commandes.Count ?? 0,
-                NombreBillets = userWithDetails?.Billets.Count ?? 0,
+                NombreCommandes = userWithDetails?.Commandes?.Count ?? 0,
+                NombreBillets = userWithDetails?.Billets?.Count ?? 0,
                 TotalDepense = userWithDetails?.Commandes.Sum(c => c.MontantTotal) ?? 0
             });
         }
@@ -186,7 +187,6 @@ public class AdminService : IAdminService
         if (offre == null)
             return false;
 
-        // Soft delete
         offre.EstActif = false;
         await _offreRepository.UpdateAsync(offre);
         
@@ -209,7 +209,6 @@ public class AdminService : IAdminService
         var commandesList = commandes.ToList();
         var billetsList = billets.ToList();
 
-        // Statistiques par offre
         var ventesParOffre = new Dictionary<string, int>();
         foreach (var commande in commandesList)
         {
@@ -223,7 +222,6 @@ public class AdminService : IAdminService
             }
         }
 
-        // Statistiques par sport
         var ventesParSport = billetsList
             .GroupBy(b => b.Sport)
             .ToDictionary(g => g.Key, g => g.Count());
@@ -391,10 +389,8 @@ public class AdminService : IAdminService
         var users = await _utilisateurRepository.GetAllAsync();
         var csv = new StringBuilder();
         
-        // En-tête
         csv.AppendLine("Id,Prénom,Nom,Email,Rôle,Actif,Date Création,Dernière Connexion");
         
-        // Données
         foreach (var user in users)
         {
             csv.AppendLine($"{user.Id}," +
@@ -422,10 +418,8 @@ public class AdminService : IAdminService
 
         var csv = new StringBuilder();
         
-        // En-tête
         csv.AppendLine("Numéro,Date,Utilisateur,Montant HT,TVA,Montant Total,Statut");
         
-        // Données
         foreach (var commande in commandes)
         {
             var utilisateur = await _utilisateurRepository.GetByIdAsync(commande.UtilisateurId);

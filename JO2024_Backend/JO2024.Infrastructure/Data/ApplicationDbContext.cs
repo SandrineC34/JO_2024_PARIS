@@ -1,5 +1,5 @@
 // ============================================
-// ApplicationDbContext.cs - Version mise à jour
+// ApplicationDbContext.cs - Version mise à jour avec Role
 // JO2024.Infrastructure/Data/ApplicationDbContext.cs
 // ============================================
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +19,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<Commande> Commandes { get; set; }
     public DbSet<CommandeItem> CommandeItems { get; set; }
     public DbSet<Billet> Billets { get; set; }
-    
-    // ajout Tables Newsletter
-   // public DbSet<NewsletterSubscription> NewsletterSubscriptions { get; set; }
-   // public DbSet<NewsletterSubscriptionHistory> NewsletterSubscriptionHistory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,9 +35,24 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Prenom).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Nom).IsRequired().HasMaxLength(100);
             entity.Property(e => e.MotDePasseHash).IsRequired();
-            entity.Property(e => e.Role).IsRequired().HasMaxLength(50).HasDefaultValue("Utilisateur");
+            
+            // ✅ Configuration de la propriété Role
+            entity.Property(e => e.Role)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasDefaultValue("Utilisateur");
+            
             entity.Property(e => e.DateCreation).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.EstActif).HasDefaultValue(true);
+            
+            // Configuration des propriétés Newsletter
+            entity.Property(e => e.NewsletterAbonne).HasDefaultValue(false);
+            entity.Property(e => e.NewsletterCategories).HasColumnType("nvarchar(max)");
+            entity.Property(e => e.NewsletterSports).HasColumnType("nvarchar(max)");
+            entity.Property(e => e.NewsletterUnsubscribeToken).HasMaxLength(255);
+            
+            // Propriétés de réinitialisation de mot de passe
+            entity.Property(e => e.ResetPasswordToken).HasMaxLength(255);
         });
 
         // ============================================
@@ -133,8 +144,5 @@ public class ApplicationDbContext : DbContext
                   .HasForeignKey(e => e.UtilisateurId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-
-        // Note: Les données de seed sont maintenant gérées dans DbInitializer.cs
-        // pour plus de flexibilité et un meilleur contrôle
     }
 }

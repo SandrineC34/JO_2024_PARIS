@@ -1,4 +1,4 @@
-// connexion.js - Version corrigée avec debug
+// connexion.js
 
 // Variables globales
 let users = JSON.parse(localStorage.getItem('jo_users') || '[]');
@@ -12,7 +12,7 @@ const CONFIG = {
 
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-   console.log('🚀 Initialisation de la page connexion');
+   console.log('Initialisation de la page connexion');
    initializeAuth();
    initializeNewsletterToggle();
    initializeInputValidation();
@@ -332,37 +332,45 @@ async function handleLogin(event) {
 }
 
 async function simulateLogin(email, password) {
-    return new Promise((resolve, reject) => {
+    try {
+        // 👉 APPEL RÉEL À L'API
+        const response = await fetch('http://localhost:5000/api/Auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                showFieldError('loginPassword', 'Email ou mot de passe incorrect');
+            } else {
+                showMessage('error', data.message || 'Erreur lors de la connexion');
+            }
+            throw new Error(data.message || 'Erreur de connexion');
+        }
+
+        // 👉 STOCKER LE TOKEN JWT
+        localStorage.setItem('jo_token', data.token);
+        localStorage.setItem('jo_current_user', JSON.stringify(data.user));
+
+        showMessage('success', `Bienvenue ${data.user.prenom} ! Connexion réussie.`);
+
         setTimeout(() => {
-            const user = users.find(u => u.email === email);
-            
-            if (!user) {
-                showFieldError('loginEmail', 'Aucun compte trouvé avec cet email');
-                reject(new Error('User not found'));
-                return;
-            }
+            window.location.href = 'index.html';
+        }, 2000);
 
-            if (user.password !== password) {
-                showFieldError('loginPassword', 'Mot de passe incorrect');
-                reject(new Error('Wrong password'));
-                return;
-            }
-
-            user.lastLogin = new Date().toISOString();
-            updateUserInStorage(user);
-
-            currentUser = user;
-            localStorage.setItem('jo_current_user', JSON.stringify(currentUser));
-            
-            showMessage('success', `Bienvenue ${user.firstName} ! Connexion réussie.`);
-            
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 2000);
-
-            resolve(user);
-        }, 1500);
-    });
+        return data.user;
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        throw error;
+    }
 }
 
 // Gestion de l'inscription
@@ -461,102 +469,90 @@ function validateRegisterForm(firstName, lastName, email, password, confirmPassw
 }
 
 async function simulateRegister(firstName, lastName, email, password) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-                showFieldError('registerEmail', 'Cette adresse email est déjà utilisée');
-                hideLoading();
-                reject(new Error('Email déjà utilisé'));
-                return;
-            }
-
-            const rgpdConsent = document.getElementById('rgpdConsent');
-            if (!rgpdConsent || !rgpdConsent.checked) {
-                showMessage('error', 'Vous devez accepter la politique de confidentialité.');
-                hideLoading();
-                reject(new Error('RGPD non accepté'));
-                return;
-            }
-
-            // Récupération des préférences newsletter
-            const newsletterConsent = document.getElementById('newsletterConsent')?.checked || false;
-            
-            let selectedSports = [];
-            if (newsletterConsent && document.getElementById('category_sport')?.checked) {
-                const sportsMap = {
-                    'sport_natation': 'Natation',
-                    'sport_athletisme': 'Athlétisme',
-                    'sport_basketball': 'Basketball',
-                    'sport_surf': 'Surf',
-                    'sport_gymnastique': 'Gymnastique'
-                };
-                
-                Object.keys(sportsMap).forEach(sportId => {
-                    const checkbox = document.getElementById(sportId);
-                    if (checkbox && checkbox.checked) {
-                        selectedSports.push({
-                            id: sportId.replace('sport_', ''),
-                            name: sportsMap[sportId]
-                        });
-                    }
-                });
-            }
-            
-            const newsletterPreferences = {
-                subscribed: newsletterConsent,
-                categories: {
-                    sport: newsletterConsent && (document.getElementById('category_sport')?.checked || false),
-                    evenements: newsletterConsent && (document.getElementById('category_evenements')?.checked || false),
-                    billets: newsletterConsent && (document.getElementById('category_billets')?.checked || false)
-                },
-                sports: selectedSports,
-                subscribedAt: newsletterConsent ? new Date().toISOString() : null,
-                unsubscribeToken: newsletterConsent ? generateUnsubscribeToken() : null
+    try {
+        const newsletterConsent = document.getElementById('newsletterConsent')?.checked || false;
+        
+        let selectedSports = [];
+        if (newsletterConsent && document.getElementById('category_sport')?.checked) {
+            const sportsMap = {
+                'sport_natation': 'Natation',
+                'sport_athletisme': 'Athlétisme',
+                'sport_basketball': 'Basketball',
+                'sport_surf': 'Surf',
+                'sport_gymnastique': 'Gymnastique'
             };
-
-            console.log('📧 Préférences newsletter:', newsletterPreferences);
-
-            const newUser = {
-                id: generateUserId(),
-                firstName: capitalizeFirstLetter(firstName),
-                lastName: capitalizeFirstLetter(lastName),
-                email: email.toLowerCase(),
-                password,
-                securityKey: generateSecurityKey(),
-                newsletter: newsletterPreferences,
-                rgpdAcceptedAt: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                isActive: true
-            };
-
-            users.push(newUser);
-            localStorage.setItem('jo_users', JSON.stringify(users));
             
-            currentUser = newUser;
-            localStorage.setItem('jo_current_user', JSON.stringify(currentUser));
-
-            let successMsg = `Félicitations ${newUser.firstName} ! Votre compte a été créé avec succès. `;
-            if (newsletterConsent) {
-                successMsg += `📧 Vous êtes abonné à la newsletter`;
-                if (selectedSports.length > 0) {
-                    const sportsNames = selectedSports.map(s => s.name).join(', ');
-                    successMsg += ` (Sports: ${sportsNames})`;
+            Object.keys(sportsMap).forEach(sportId => {
+                const checkbox = document.getElementById(sportId);
+                if (checkbox && checkbox.checked) {
+                    selectedSports.push({
+                        id: sportId.replace('sport_', ''),
+                        name: sportsMap[sportId]
+                    });
                 }
-                successMsg += '. ';
+            });
+        }
+
+        // 👉 APPEL RÉEL À L'API
+        const response = await fetch('http://localhost:5000/api/Auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prenom: firstName,
+                nom: lastName,
+                email: email,
+                password: password,
+                newsletterPreferences: {
+                    subscribed: newsletterConsent,
+                    categories: {
+                        sport: newsletterConsent && (document.getElementById('category_sport')?.checked || false),
+                        evenements: newsletterConsent && (document.getElementById('category_evenements')?.checked || false),
+                        billets: newsletterConsent && (document.getElementById('category_billets')?.checked || false)
+                    },
+                    sports: selectedSports
+                }
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (response.status === 400 && data.message?.includes('email')) {
+                showFieldError('registerEmail', 'Cette adresse email est déjà utilisée');
+            } else {
+                showMessage('error', data.message || 'Erreur lors de l\'inscription');
             }
-            successMsg += `Redirection en cours...`;
+            throw new Error(data.message || 'Erreur d\'inscription');
+        }
 
-            showMessage('success', successMsg);
+        // 👉 STOCKER LE TOKEN JWT
+        localStorage.setItem('jo_token', data.token);
+        localStorage.setItem('jo_current_user', JSON.stringify(data.user));
 
-            setTimeout(() => {
-                hideLoading();
-                window.location.href = 'compte.html';
-            }, 2000);
+        let successMsg = `Félicitations ${data.user.prenom} ! Votre compte a été créé avec succès. `;
+        if (newsletterConsent) {
+            successMsg += `📧 Vous êtes abonné à la newsletter`;
+            if (selectedSports.length > 0) {
+                const sportsNames = selectedSports.map(s => s.name).join(', ');
+                successMsg += ` (Sports: ${sportsNames})`;
+            }
+            successMsg += '. ';
+        }
+        successMsg += `📨 Un email de bienvenue vous a été envoyé. Redirection en cours...`;
 
-            resolve(newUser);
-        }, 1500);
-    });
+        showMessage('success', successMsg);
+
+        setTimeout(() => {
+            window.location.href = 'compte.html';
+        }, 3000);
+
+        return data.user;
+    } catch (error) {
+        console.error('Erreur lors de l\'inscription:', error);
+        throw error;
+    }
 }
 
 // Mot de passe oublié

@@ -1,4 +1,4 @@
-<!--header.html -->
+<!--header.html - Version dynamique -->
 <header>
     <div class="container">
         <div class="nav-container">
@@ -9,10 +9,43 @@
                     <li><a href="index.html">Accueil</a></li>
                     <li><a href="offres.html">Offres</a></li>
                     <li><a href="panier.html">Panier (<span id="cart-count">0</span>)</a></li>
-                    <li><a href="compte.html">Mon compte</a></li>
-                    <li><a href="connexion.html">Connexion</a></li>
+                    <li id="nav-compte" style="display: none;">
+                        <a href="compte.html">Mon compte</a>
+                    </li>
+                    <li id="nav-connexion">
+                        <a href="connexion.html">Connexion</a>
+                    </li>
+                    <li id="nav-logout" style="display: none;">
+                        <a href="#" onclick="logout(); return false;">Déconnexion</a>
+                    </li>
                 </ul>
             </nav>
         </div>
     </div>
 </header>
+
+<script>
+// Script pour afficher/masquer les éléments selon l'état de connexion
+(function() {
+    const token = localStorage.getItem('jo_token');
+    const currentUser = JSON.parse(localStorage.getItem('jo_current_user') || 'null');
+    
+    if (token && currentUser) {
+        // Utilisateur connecté
+        document.getElementById('nav-compte').style.display = 'block';
+        document.getElementById('nav-logout').style.display = 'block';
+        document.getElementById('nav-connexion').style.display = 'none';
+    } else {
+        // Utilisateur non connecté
+        document.getElementById('nav-compte').style.display = 'none';
+        document.getElementById('nav-logout').style.display = 'none';
+        document.getElementById('nav-connexion').style.display = 'block';
+    }
+})();
+
+function logout() {
+    localStorage.removeItem('jo_token');
+    localStorage.removeItem('jo_current_user');
+    window.location.href = 'connexion.html';
+}
+</script>

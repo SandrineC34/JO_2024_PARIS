@@ -1,6 +1,6 @@
 // ============================================
 // Auth DTOs
-// JO2024.Core/DTOs/Auth/
+// JO2024.Core/DTOs/Auth/Auth.cs
 // ============================================
 using System.ComponentModel.DataAnnotations;
 
@@ -25,6 +25,9 @@ public class RegisterDto
     [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$", 
         ErrorMessage = "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial")]
     public string Password { get; set; } = string.Empty;
+
+    // ✅ AJOUT : Préférences newsletter
+    public NewsletterPreferencesDto? NewsletterPreferences { get; set; }
 }
 
 public class LoginDto
@@ -78,4 +81,28 @@ public class UtilisateurDto
     public string Email { get; set; } = string.Empty;
     public DateTime DateCreation { get; set; }
     public DateTime? DerniereConnexion { get; set; }
+}
+
+// ============================================
+// ✅ NOUVEAUX DTOs POUR LA NEWSLETTER
+// ============================================
+
+public class NewsletterPreferencesDto
+{
+    public bool Subscribed { get; set; }
+    public NewsletterCategoriesDto? Categories { get; set; }
+    public List<SportPreferenceDto>? Sports { get; set; }
+}
+
+public class NewsletterCategoriesDto
+{
+    public bool Sport { get; set; }
+    public bool Evenements { get; set; }
+    public bool Billets { get; set; }
+}
+
+public class SportPreferenceDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 }

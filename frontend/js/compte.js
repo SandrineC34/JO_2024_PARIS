@@ -1,6 +1,6 @@
-// compte.js - Version mise à jour avec gestion Newsletter
+// compte.js - Version complète avec authentification JWT
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 let currentUser = null;
 let userTickets = [];
@@ -12,7 +12,7 @@ let newsletterPreferences = null;
 // ===========================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Initialisation de la page Mon Compte');
+    console.log('📱 Initialisation de la page Mon Compte');
     
     await checkAuthentication();
     await loadUserData();
@@ -22,24 +22,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ===========================
-// AUTHENTIFICATION
+// AUTHENTIFICATION JWT
 // ===========================
 
 async function checkAuthentication() {
     try {
+        const token = localStorage.getItem('jo_token');
+        
+        if (!token) {
+            console.log('❌ Pas de token trouvé, redirection vers connexion');
+            window.location.href = '/connexion.html';
+            return;
+        }
+
+        // 👉 Appel API avec le token JWT dans le header
         const response = await fetch(`${API_BASE_URL}/Auth/current`, {
-            credentials: 'include'
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
         });
         
         if (!response.ok) {
+            console.log('❌ Token invalide ou expiré');
+            localStorage.removeItem('jo_token');
+            localStorage.removeItem('jo_current_user');
             window.location.href = '/connexion.html';
             return;
         }
         
         currentUser = await response.json();
         updateWelcomeMessage();
+        console.log('✅ Utilisateur authentifié:', currentUser);
     } catch (error) {
         console.error('Erreur d\'authentification:', error);
+        localStorage.removeItem('jo_token');
+        localStorage.removeItem('jo_current_user');
         showError('Erreur de connexion. Veuillez vous reconnecter.');
         setTimeout(() => {
             window.location.href = '/connexion.html';
@@ -55,6 +74,39 @@ function updateWelcomeMessage() {
 }
 
 // ===========================
+// FONCTION FETCH AUTHENTIFIÉE
+// ===========================
+
+async function authenticatedFetch(url, options = {}) {
+    const token = localStorage.getItem('jo_token');
+    
+    if (!token) {
+        throw new Error('Non authentifié');
+    }
+
+    const authOptions = {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    };
+
+    const response = await fetch(url, authOptions);
+    
+    if (response.status === 401) {
+        console.log('❌ Session expirée');
+        localStorage.removeItem('jo_token');
+        localStorage.removeItem('jo_current_user');
+        window.location.href = '/connexion.html';
+        throw new Error('Session expirée');
+    }
+
+    return response;
+}
+
+// ===========================
 // CHARGEMENT DES DONNÉES
 // ===========================
 
@@ -64,15 +116,16 @@ async function loadUserData() {
             loadTickets(),
             loadOrders(),
             loadUserProfile(),
-            loadNewsletterPreferences() // ⭐ NOUVEAU
+            loadNewsletterPreferences()
         ]);
     } catch (error) {
         console.error('Erreur de chargement des données:', error);
         showError('Impossible de charger vos données');
     }
 }
+
 // ===========================
-// Gestion des billets (tickets)
+// GESTION DES BILLETS
 // ===========================
 
 async function loadTickets() {
@@ -82,9 +135,7 @@ async function loadTickets() {
     try {
         if (loader) loader.style.display = 'block';
         
-        const response = await fetch(`${API_BASE_URL}/Billets`, {
-            credentials: 'include'
-        });
+        const response = await authenticatedFetch(`${API_BASE_URL}/Billets`);
         
         if (!response.ok) {
             throw new Error('Erreur lors du chargement des billets');
@@ -171,6 +222,120 @@ function displayTickets() {
     `).join('');
 }
 
+function toggleTicketDetails(card) {
+    const details = card.querySelector('.ticket-details');
+    const isOpen = details.style.display === 'block';
+    
+    document.querySelectorAll('.ticket-details').forEach(d => {
+        d.style.display = 'none';
+    });
+    
+    if (!isOpen) {
+        details.style.display = 'block';
+    }
+}
+
+async function viewQRCode(event, billetId) {
+    event.stopPropagation();
+    
+    try {
+        const response = await authenticatedFetch(`${API_BASE_URL}/Billets/${billetId}`);
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération du QR code');
+        }
+        
+        const billet = await response.json();
+        showQRCodeModal(billet);
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible d\'afficher le QR code');
+    }
+}
+
+function showQRCodeModal(billet) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>QR Code - ${escapeHtml(billet.numero)}</h3>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 30px;">
+                <img src="${escapeHtml(billet.codeQR)}" alt="QR Code" style="max-width: 300px; border: 2px solid #004e92;">
+                <p style="margin-top: 20px; color: #666;">
+                    ${escapeHtml(billet.titre)}<br>
+                    📅 ${formatDate(billet.dateEpreuve)}
+                </p>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #999;">
+                    Présentez ce QR code à l'entrée de l'événement
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+async function downloadPDF(event, billetId) {
+    event.stopPropagation();
+    
+    try {
+        const response = await authenticatedFetch(`${API_BASE_URL}/Billets/${billetId}/download`, {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors du téléchargement');
+        }
+        
+        const result = await response.json();
+        showSuccess('PDF généré avec succès ! Téléchargement en cours...');
+        
+        console.log('Download URL:', result.downloadUrl);
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible de télécharger le PDF');
+    }
+}
+
+async function sendByEmail(event, billetId) {
+    event.stopPropagation();
+    
+    if (!confirm('Voulez-vous recevoir ce billet par email ?')) {
+        return;
+    }
+    
+    try {
+        const response = await authenticatedFetch(`${API_BASE_URL}/Billets/${billetId}/email`, {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors de l\'envoi');
+        }
+        
+        const result = await response.json();
+        showSuccess(result.message || 'Email envoyé avec succès !');
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible d\'envoyer l\'email');
+    }
+}
+
+// ===========================
+// GESTION DES COMMANDES
+// ===========================
+
 async function loadOrders() {
     const loader = document.getElementById('ordersLoader');
     const tbody = document.getElementById('ordersContainer');
@@ -178,9 +343,7 @@ async function loadOrders() {
     try {
         if (loader) loader.style.display = 'block';
         
-        const response = await fetch(`${API_BASE_URL}/Commandes`, {
-            credentials: 'include'
-        });
+        const response = await authenticatedFetch(`${API_BASE_URL}/Commandes`);
         
         if (!response.ok) {
             throw new Error('Erreur lors du chargement des commandes');
@@ -243,6 +406,10 @@ function displayOrders() {
     `).join('');
 }
 
+// ===========================
+// GESTION DU PROFIL
+// ===========================
+
 async function loadUserProfile() {
     const loader = document.getElementById('settingsLoader');
     const form = document.getElementById('profileForm');
@@ -250,9 +417,7 @@ async function loadUserProfile() {
     try {
         if (loader) loader.style.display = 'block';
         
-        const response = await fetch(`${API_BASE_URL}/Compte/profile`, {
-            credentials: 'include'
-        });
+        const response = await authenticatedFetch(`${API_BASE_URL}/Compte/profile`);
         
         if (!response.ok) {
             throw new Error('Erreur lors du chargement du profil');
@@ -283,25 +448,107 @@ function fillProfileForm(profile) {
     document.getElementById('email').value = profile.email || '';
 }
 
-// ===========================
-// NEWSLETTER LOGIQUE COMPLETE
-// ===========================
-// Chargement préférences Newsletter
-async function loadNewsletterPreferences() {
+async function saveSettings(event) {
+    event.preventDefault();
+    
+    const formData = {
+        prenom: document.getElementById('firstName').value,
+        nom: document.getElementById('lastName').value,
+        email: document.getElementById('email').value
+    };
+    
     try {
-        const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
-            credentials: 'include'
+        const response = await authenticatedFetch(`${API_BASE_URL}/Compte/profile`, {
+            method: 'PUT',
+            body: JSON.stringify(formData)
         });
         
         if (!response.ok) {
-            // Si pas de préférences, créer par défaut
+            throw new Error('Erreur lors de la mise à jour');
+        }
+        
+        showSuccess('Informations mises à jour avec succès !');
+        
+        await checkAuthentication();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Impossible de mettre à jour vos informations');
+    }
+}
+
+async function changePassword(event) {
+    event.preventDefault();
+    
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+        showError('Les mots de passe ne correspondent pas');
+        return;
+    }
+    
+    if (!validatePassword(newPassword)) {
+        showError('Le mot de passe ne respecte pas les critères de sécurité');
+        return;
+    }
+    
+    try {
+        const response = await authenticatedFetch(`${API_BASE_URL}/Auth/change-password`, {
+            method: 'POST',
+            body: JSON.stringify({
+                currentPassword,
+                newPassword
+            })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Erreur lors du changement de mot de passe');
+        }
+        
+        showSuccess('Mot de passe modifié avec succès !');
+        
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError(error.message);
+    }
+}
+
+function validatePassword(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*]/.test(password);
+    
+    return password.length >= minLength && 
+           hasUpperCase && 
+           hasLowerCase && 
+           hasNumbers && 
+           hasSpecialChar;
+}
+
+// ===========================
+// NEWSLETTER - GESTION COMPLÈTE
+// ===========================
+
+async function loadNewsletterPreferences() {
+    try {
+        const response = await authenticatedFetch(`${API_BASE_URL}/Newsletter/preferences`);
+        
+        if (!response.ok) {
             newsletterPreferences = {
                 estAbonne: false,
                 categories: {
                     sports: false,
                     evenements: false,
                     billets: false
-                }
+                },
+                sports: []
             };
         } else {
             newsletterPreferences = await response.json();
@@ -312,23 +559,21 @@ async function loadNewsletterPreferences() {
         console.error('Erreur chargement newsletter:', error);
         newsletterPreferences = {
             estAbonne: false,
-            categories: { sports: false, evenements: false, billets: false }
+            categories: { sports: false, evenements: false, billets: false },
+            sports: []
         };
         displayNewsletterForm();
     }
 }
 
-// Affichage du formulaire Newsletter
 function displayNewsletterForm() {
     const newsletterAbonne = document.getElementById('newsletterAbonne');
     const categoriesSection = document.getElementById('categoriesSection');
     
     if (!newsletterAbonne) return;
     
-    // Remplir le formulaire
     newsletterAbonne.checked = newsletterPreferences?.estAbonne || false;
     
-    // Créer les checkboxes de catégories avec sports détaillés
     if (categoriesSection) {
         categoriesSection.innerHTML = `
             <h4 style="margin-bottom: 15px; color: #333;">Catégories d'intérêt :</h4>
@@ -380,9 +625,11 @@ function displayNewsletterForm() {
                 <span style="font-weight: 500;">🎫 Offres spéciales billets</span>
             </label>
         `;
+        
         updateCategoriesVisibility();
         setupSportsToggle();
     }
+    
     newsletterAbonne.addEventListener('change', updateCategoriesVisibility);
 }
 
@@ -396,15 +643,19 @@ function hasSport(sportId) {
 function setupSportsToggle() {
     const categorySport = document.getElementById('category_sport');
     const sportsSubcategories = document.getElementById('sportsSubcategories');
+    
     if (!categorySport || !sportsSubcategories) return;
+    
     categorySport.addEventListener('change', function() {
         const isChecked = this.checked;
         sportsSubcategories.style.display = isChecked ? 'block' : 'none';
+        
         document.querySelectorAll('[name^="sport_"]').forEach(cb => {
             cb.disabled = !isChecked;
             if (!isChecked) cb.checked = false;
         });
     });
+    
     const categoryIsChecked = categorySport.checked;
     document.querySelectorAll('[name^="sport_"]').forEach(cb => {
         cb.disabled = !categoryIsChecked;
@@ -417,20 +668,25 @@ function updateCategoriesVisibility() {
     const categoryInputs = categoriesSection?.querySelectorAll('input[type="checkbox"]:not([name^="sport_"])');
     const sportInputs = document.querySelectorAll('[name^="sport_"]');
     const categorySport = document.getElementById('category_sport');
+    
     if (!newsletterAbonne || !categoriesSection) return;
+    
     const isSubscribed = newsletterAbonne.checked;
+    
     if (categoryInputs) {
         categoryInputs.forEach(input => {
             input.disabled = !isSubscribed;
             input.closest('label').style.opacity = isSubscribed ? '1' : '0.5';
         });
     }
+    
     if (sportInputs && categorySport) {
         const sportCategoryChecked = isSubscribed && categorySport.checked;
         sportInputs.forEach(input => {
             input.disabled = !sportCategoryChecked;
         });
     }
+    
     if (!isSubscribed) {
         if (categoryInputs) {
             categoryInputs.forEach(input => input.checked = false);
@@ -445,14 +701,15 @@ function updateCategoriesVisibility() {
     }
 }
 
-// Sauvegarde des préférences Newsletter
 async function saveNewsletterPreferences(event) {
     event.preventDefault();
+    
     const newsletterAbonne = document.getElementById('newsletterAbonne');
     const estAbonne = newsletterAbonne?.checked || false;
     const categorySport = document.getElementById('category_sport')?.checked || false;
     const categoryEvenements = document.getElementById('category_evenements')?.checked || false;
     const categoryBillets = document.getElementById('category_billets')?.checked || false;
+    
     let selectedSports = [];
     if (estAbonne && categorySport) {
         const sportsMap = {
@@ -462,6 +719,7 @@ async function saveNewsletterPreferences(event) {
             'sport_surf': 'Surf',
             'sport_gymnastique': 'Gymnastique'
         };
+        
         Object.keys(sportsMap).forEach(sportId => {
             const checkbox = document.getElementById(sportId);
             if (checkbox && checkbox.checked) {
@@ -472,6 +730,7 @@ async function saveNewsletterPreferences(event) {
             }
         });
     }
+    
     const updateDto = {
         estAbonne: estAbonne,
         categories: {
@@ -481,15 +740,17 @@ async function saveNewsletterPreferences(event) {
         },
         sports: selectedSports
     };
+    
     try {
-        const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
+        const response = await authenticatedFetch(`${API_BASE_URL}/Newsletter/preferences`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify(updateDto)
         });
+        
         if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+        
         const result = await response.json();
+        
         if (estAbonne) {
             let msg = 'Préférences mises à jour ! ';
             if (selectedSports.length > 0) {
@@ -500,6 +761,7 @@ async function saveNewsletterPreferences(event) {
         } else {
             showSuccess('Vous avez été désinscrit de la newsletter.');
         }
+        
         await loadNewsletterPreferences();
     } catch (error) {
         console.error('Erreur:', error);
@@ -507,297 +769,13 @@ async function saveNewsletterPreferences(event) {
     }
 }
 
-function updateCategoriesVisibility() {
-    const newsletterAbonne = document.getElementById('newsletterAbonne');
-    const categoriesSection = document.getElementById('categoriesSection');
-    const categoryInputs = categoriesSection?.querySelectorAll('input[type="checkbox"]');
-    
-    if (!newsletterAbonne || !categoriesSection) return;
-    
-    const isSubscribed = newsletterAbonne.checked;
-    
-    // Afficher/masquer les catégories
-    if (categoryInputs) {
-        categoryInputs.forEach(input => {
-            input.disabled = !isSubscribed;
-            input.closest('label').style.opacity = isSubscribed ? '1' : '0.5';
-        });
-    }
-    
-    // Si on décoche, décocher toutes les catégories
-    if (!isSubscribed && categoryInputs) {
-        categoryInputs.forEach(input => input.checked = false);
-    }
-}
-
-async function saveNewsletterPreferences(event) {
-    event.preventDefault();
-    
-    const newsletterAbonne = document.getElementById('newsletterAbonne');
-    const estAbonne = newsletterAbonne?.checked || false;
-    
-    const updateDto = {
-        estAbonne: estAbonne,
-        categories: {
-            sports: estAbonne && document.getElementById('category_sport')?.checked || false,
-            evenements: estAbonne && document.getElementById('category_evenements')?.checked || false,
-            billets: estAbonne && document.getElementById('category_billets')?.checked || false
-        }
-    };
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/Newsletter/preferences`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(updateDto)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors de la mise à jour');
-        }
-        
-        const result = await response.json();
-        
-        // Message personnalisé
-        if (estAbonne) {
-            showSuccess('Préférences mises à jour ! Vous recevrez la newsletter selon vos choix.');
-        } else {
-            showSuccess('Vous avez été désinscrit de la newsletter.');
-        }
-        
-        // Recharger les préférences
-        await loadNewsletterPreferences();
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError('Impossible de mettre à jour vos préférences newsletter');
-    }
-}
-
-
-
-
 // ===========================
-// ACTIONS SUR LES BILLETS
+// RGPD
 // ===========================
-
-function toggleTicketDetails(card) {
-    const details = card.querySelector('.ticket-details');
-    const isOpen = details.style.display === 'block';
-    
-    document.querySelectorAll('.ticket-details').forEach(d => {
-        d.style.display = 'none';
-    });
-    
-    if (!isOpen) {
-        details.style.display = 'block';
-    }
-}
-
-async function viewQRCode(event, billetId) {
-    event.stopPropagation();
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/Billets/${billetId}`, {
-            credentials: 'include'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors de la récupération du QR code');
-        }
-        
-        const billet = await response.json();
-        showQRCodeModal(billet);
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError('Impossible d\'afficher le QR code');
-    }
-}
-
-function showQRCodeModal(billet) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>QR Code - ${escapeHtml(billet.numero)}</h3>
-                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
-                    ✕
-                </button>
-            </div>
-            <div class="modal-body" style="text-align: center; padding: 30px;">
-                <img src="${escapeHtml(billet.codeQR)}" alt="QR Code" style="max-width: 300px; border: 2px solid #004e92;">
-                <p style="margin-top: 20px; color: #666;">
-                    ${escapeHtml(billet.titre)}<br>
-                    📅 ${formatDate(billet.dateEpreuve)}
-                </p>
-                <p style="margin-top: 10px; font-size: 0.9em; color: #999;">
-                    Présentez ce QR code à l'entrée de l'événement
-                </p>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
-}
-
-async function downloadPDF(event, billetId) {
-    event.stopPropagation();
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/Billets/${billetId}/download`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors du téléchargement');
-        }
-        
-        const result = await response.json();
-        showSuccess('PDF généré avec succès ! Téléchargement en cours...');
-        
-        console.log('Download URL:', result.downloadUrl);
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError('Impossible de télécharger le PDF');
-    }
-}
-
-async function sendByEmail(event, billetId) {
-    event.stopPropagation();
-    
-    if (!confirm('Voulez-vous recevoir ce billet par email ?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/Billets/${billetId}/email`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors de l\'envoi');
-        }
-        
-        const result = await response.json();
-        showSuccess(result.message);
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError('Impossible d\'envoyer l\'email');
-    }
-}
-
-// ===========================
-// GESTION DU PROFIL
-// ===========================
-
-async function saveSettings(event) {
-    event.preventDefault();
-    
-    const formData = {
-        prenom: document.getElementById('firstName').value,
-        nom: document.getElementById('lastName').value,
-        email: document.getElementById('email').value
-    };
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/Compte/profile`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(formData)
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors de la mise à jour');
-        }
-        
-        showSuccess('Informations mises à jour avec succès !');
-        
-        await checkAuthentication();
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError('Impossible de mettre à jour vos informations');
-    }
-}
-
-async function changePassword(event) {
-    event.preventDefault();
-    
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
-    if (newPassword !== confirmPassword) {
-        showError('Les mots de passe ne correspondent pas');
-        return;
-    }
-    
-    if (!validatePassword(newPassword)) {
-        showError('Le mot de passe ne respecte pas les critères de sécurité');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/Compte/change-password`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                currentPassword,
-                newPassword
-            })
-        });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Erreur lors du changement de mot de passe');
-        }
-        
-        showSuccess('Mot de passe modifié avec succès !');
-        
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError(error.message);
-    }
-}
-
-function validatePassword(password) {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*]/.test(password);
-    
-    return password.length >= minLength && 
-           hasUpperCase && 
-           hasLowerCase && 
-           hasNumbers && 
-           hasSpecialChar;
-}
 
 async function downloadUserData() {
     try {
-        const response = await fetch(`${API_BASE_URL}/Compte/export-data`, {
-            credentials: 'include'
-        });
+        const response = await authenticatedFetch(`${API_BASE_URL}/Compte/export-data`);
         
         if (!response.ok) {
             throw new Error('Erreur lors de l\'export');
@@ -820,7 +798,6 @@ async function downloadUserData() {
     }
 }
 
-// Suppression de compte avec confirmation par email
 function confirmDeleteAccount() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +
@@ -842,123 +819,9 @@ function confirmDeleteAccount() {
 
 async function deleteAccount() {
     try {
-        const response = await fetch(`${API_BASE_URL}/Compte/delete`, {
-            method: 'DELETE',
-            credentials: 'include'
+        const response = await authenticatedFetch(`${API_BASE_URL}/Compte/delete`, {
+            method: 'DELETE'
         });
         
         if (!response.ok) {
             throw new Error('Erreur lors de la suppression');
-        }
-        
-        alert('✅ Votre compte a été supprimé. Un email de confirmation vous a été envoyé. Vous allez être déconnecté.');
-        window.location.href = '/';
-    } catch (error) {
-        console.error('Erreur:', error);
-        showError('Impossible de supprimer votre compte');
-    }
-}
-
-// ===========================
-// NAVIGATION
-// ===========================
-
-function setupNavigation() {
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const section = link.dataset.section;
-            showSection(section);
-            
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-}
-
-function showSection(sectionName) {
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    const section = document.getElementById(sectionName);
-    if (section) {
-        section.classList.add('active');
-    }
-}
-
-// ===========================
-// UTILITAIRES
-// ===========================
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-function formatTime(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-function getStatusClass(statut) {
-    const statusMap = {
-        'Actif': 'status-active',
-        'Scanné': 'status-scanned',
-        'Payée': 'status-active',
-        'Utilisée': 'status-scanned',
-        'Annulée': 'status-cancelled'
-    };
-    return statusMap[statut] || 'status-active';
-}
-
-function getStatusText(billet) {
-    if (billet.statut === 'Actif') {
-        return 'Actif - Prêt à être utilisé';
-    } else if (billet.statut === 'Scanné' && billet.dateScan) {
-        return `Scanné le ${formatDate(billet.dateScan)}`;
-    }
-    return escapeHtml(billet.statut);
-}
-
-function showSuccess(message) {
-    const successDiv = document.getElementById('successMessage');
-    if (successDiv) {
-        successDiv.textContent = message;
-        successDiv.style.display = 'block';
-        
-        setTimeout(() => {
-            successDiv.style.display = 'none';
-        }, 5000);
-    }
-}
-
-function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) {
-        errorDiv.textContent = '❌ ' + message;
-        errorDiv.style.display = 'block';
-        
-        setTimeout(() => {
-            errorDiv.style.display = 'none';
-        }, 5000);
-    }
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}

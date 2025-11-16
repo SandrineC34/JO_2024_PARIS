@@ -22,6 +22,7 @@ namespace JO2024.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             // ============================================================
             // 💾 CONFIGURATION BASE DE DONNÉES
