@@ -628,3 +628,18 @@
 [2025-11-16 19:05:00] Nombre de mails envoyés : 0
 [2025-11-16 19:05:00] Fin du job newsletter.
 
+===== [2025-11-16 19:10:00] Lancement du job newsletter =====
+[2025-11-16 19:10:00] Échec de l'envoi (code HTTP: 404)
+[2025-11-16 19:10:00] Nombre de mails envoyés : 0
+[2025-11-16 19:10:00] Fin du job newsletter.
+
+===== [2025-11-16 19:15:00] Lancement du job newsletter =====
+[2025-11-16 19:15:00] Échec de l'envoi (code HTTP: 404)
+[2025-11-16 19:15:00] Nombre de mails envoyés : 0
+[2025-11-16 19:15:00] Fin du job newsletter.
+
+===== [2025-11-16 19:20:00] Lancement du job newsletter =====
+[2025-11-16 19:20:00] Échec de l'envoi (code HTTP: 404)
+[2025-11-16 19:20:00] Nombre de mails envoyés : 0
+[2025-11-16 19:20:00] Fin du job newsletter.
+
