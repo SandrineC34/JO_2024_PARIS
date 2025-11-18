@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JO2024.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+105183898963463a736c057f2fb01bdbb0b0eb60")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b63a6245f23fac44a3e1861c60fa8b848db98f41")]
 [assembly: System.Reflection.AssemblyProductAttribute("JO2024.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JO2024.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

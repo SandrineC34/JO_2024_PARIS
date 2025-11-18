@@ -1,110 +1,111 @@
 -- ============================================
--- Script d'initialisation de la base de données
--- JO 2024 Paris - MySQL
+-- Script de création des tables JO2024
 -- ============================================
 
--- Utiliser la base de données
 USE jo2024_db;
 
 -- ============================================
--- Création des tables si elles n'existent pas
--- Entity Framework les créera automatiquement,
--- mais ce script sert de fallback
--- ============================================
-
 -- Table Utilisateurs
+-- ============================================
 CREATE TABLE IF NOT EXISTS Utilisateurs (
     Id INT AUTO_INCREMENT PRIMARY KEY,
-    Email VARCHAR(255) NOT NULL UNIQUE,
     Prenom VARCHAR(100) NOT NULL,
     Nom VARCHAR(100) NOT NULL,
-    MotDePasseHash VARCHAR(500) NOT NULL,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    MotDePasseHash VARCHAR(255) NOT NULL,
+    DateCreation DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    DerniereConnexion DATETIME(6) NULL,
+    EstActif BOOLEAN NOT NULL DEFAULT TRUE,
     Role VARCHAR(50) NOT NULL DEFAULT 'Utilisateur',
-    DateCreation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    EstActif BOOLEAN DEFAULT TRUE,
+    
+    -- Réinitialisation mot de passe
+    ResetPasswordToken VARCHAR(255) NULL,
+    ResetPasswordExpiry DATETIME(6) NULL,
+    
+    -- Newsletter
+    NewsletterAbonne BOOLEAN NOT NULL DEFAULT FALSE,
+    NewsletterCategories TEXT NULL,
+    NewsletterSports TEXT NULL,
+    NewsletterUnsubscribeToken VARCHAR(255) NULL,
+    NewsletterDateInscription DATETIME(6) NULL,
+    NewsletterDateDesinscription DATETIME(6) NULL,
+    
     INDEX idx_email (Email),
-    INDEX idx_role (Role)
+    INDEX idx_reset_token (ResetPasswordToken),
+    INDEX idx_newsletter_token (NewsletterUnsubscribeToken)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
 -- Table Offres
+-- ============================================
 CREATE TABLE IF NOT EXISTS Offres (
     Id INT AUTO_INCREMENT PRIMARY KEY,
-    Type VARCHAR(50) NOT NULL,
     Nom VARCHAR(200) NOT NULL,
-    Description VARCHAR(1000),
+    Description TEXT NOT NULL,
     Prix DECIMAL(10,2) NOT NULL,
-    NombrePersonnes INT NOT NULL,
-    Caracteristiques VARCHAR(500),
-    EstActif BOOLEAN DEFAULT TRUE,
-    DateCreation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_type (Type),
+    QuantiteDisponible INT NOT NULL,
+    DateDebut DATETIME(6) NOT NULL,
+    DateFin DATETIME(6) NOT NULL,
+    EstActif BOOLEAN NOT NULL DEFAULT TRUE,
+    
+    INDEX idx_dates (DateDebut, DateFin),
     INDEX idx_actif (EstActif)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
 -- Table Commandes
+-- ============================================
 CREATE TABLE IF NOT EXISTS Commandes (
     Id INT AUTO_INCREMENT PRIMARY KEY,
-    Numero VARCHAR(50) NOT NULL UNIQUE,
     UtilisateurId INT NOT NULL,
-    DateAchat DATETIME DEFAULT CURRENT_TIMESTAMP,
-    MontantHT DECIMAL(10,2) NOT NULL,
-    MontantTVA DECIMAL(10,2) NOT NULL,
+    DateCommande DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     MontantTotal DECIMAL(10,2) NOT NULL,
-    Statut VARCHAR(50) NOT NULL DEFAULT 'Payée',
-    MethodePaiement VARCHAR(100),
-    FOREIGN KEY (UtilisateurId) REFERENCES Utilisateurs(Id) ON DELETE RESTRICT,
-    INDEX idx_numero (Numero),
+    Statut VARCHAR(50) NOT NULL DEFAULT 'EnAttente',
+    CleSecurity VARCHAR(255) NOT NULL,
+    
+    FOREIGN KEY (UtilisateurId) REFERENCES Utilisateurs(Id) ON DELETE CASCADE,
     INDEX idx_utilisateur (UtilisateurId),
-    INDEX idx_date (DateAchat)
+    INDEX idx_date (DateCommande),
+    INDEX idx_statut (Statut)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Table CommandeItems
-CREATE TABLE IF NOT EXISTS CommandeItems (
+-- ============================================
+-- Table Billets
+-- ============================================
+CREATE TABLE IF NOT EXISTS Billets (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     CommandeId INT NOT NULL,
     OffreId INT NOT NULL,
-    Quantite INT NOT NULL,
-    PrixUnitaire DECIMAL(10,2) NOT NULL,
-    PrixTotal DECIMAL(10,2) NOT NULL,
-    Sport VARCHAR(100),
+    UtilisateurId INT NOT NULL,
+    CleSecurity VARCHAR(255) NOT NULL,
+    QRCode TEXT NOT NULL,
+    DateGeneration DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    EstUtilise BOOLEAN NOT NULL DEFAULT FALSE,
+    DateUtilisation DATETIME(6) NULL,
+    
     FOREIGN KEY (CommandeId) REFERENCES Commandes(Id) ON DELETE CASCADE,
     FOREIGN KEY (OffreId) REFERENCES Offres(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (UtilisateurId) REFERENCES Utilisateurs(Id) ON DELETE CASCADE,
     INDEX idx_commande (CommandeId),
-    INDEX idx_offre (OffreId)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Table Billets
-CREATE TABLE IF NOT EXISTS Billets (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    Numero VARCHAR(50) NOT NULL UNIQUE,
-    Titre VARCHAR(200) NOT NULL,
-    Sport VARCHAR(100) NOT NULL,
-    Lieu VARCHAR(200) NOT NULL,
-    DateEpreuve DATETIME NOT NULL,
-    Place VARCHAR(50),
-    Statut VARCHAR(50) NOT NULL DEFAULT 'Actif',
-    CodeQR VARCHAR(500) NOT NULL,
-    CommandeId INT NOT NULL,
-    UtilisateurId INT NOT NULL,
-    DateCreation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (CommandeId) REFERENCES Commandes(Id) ON DELETE CASCADE,
-    FOREIGN KEY (UtilisateurId) REFERENCES Utilisateurs(Id) ON DELETE RESTRICT,
-    INDEX idx_numero (Numero),
-    INDEX idx_commande (CommandeId),
+    INDEX idx_offre (OffreId),
     INDEX idx_utilisateur (UtilisateurId),
-    INDEX idx_date_epreuve (DateEpreuve)
+    INDEX idx_qr (QRCode(255)),
+    INDEX idx_cle_security (CleSecurity)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- Données de test (optionnel)
+-- Vérification des tables créées
+-- ============================================
+SHOW TABLES;
+
+-- ============================================
+-- Insertion de données de test (optionnel)
 -- ============================================
 
--- Insérer des offres de test
-INSERT INTO Offres (Type, Nom, Description, Prix, NombrePersonnes, Caracteristiques, EstActif) VALUES
-('Solo', 'Pass Solo', 'Billet individuel pour une épreuve', 50.00, 1, 'Accès à une épreuve', TRUE),
-('Duo', 'Pass Duo', 'Billet pour 2 personnes', 90.00, 2, 'Accès pour 2 personnes', TRUE),
-('Famille', 'Pass Famille', 'Billet famille (4 personnes)', 160.00, 4, 'Accès pour 4 personnes', TRUE)
-ON DUPLICATE KEY UPDATE Type=Type;
+-- Offre de test
+INSERT INTO Offres (Nom, Description, Prix, QuantiteDisponible, DateDebut, DateFin, EstActif) VALUES
+('Pass Solo', 'Accès à une épreuve de votre choix', 50.00, 1000, '2024-07-26 00:00:00', '2024-08-11 23:59:59', TRUE),
+('Pass Duo', 'Accès pour 2 personnes à une épreuve', 90.00, 500, '2024-07-26 00:00:00', '2024-08-11 23:59:59', TRUE),
+('Pass Famille', 'Accès pour 4 personnes à une épreuve', 160.00, 300, '2024-07-26 00:00:00', '2024-08-11 23:59:59', TRUE);
 
--- Message de confirmation
-SELECT '✅ Base de données initialisée avec succès!' AS Message;
+SELECT 'Tables créées avec succès !' as Status;
