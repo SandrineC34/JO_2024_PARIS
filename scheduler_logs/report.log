@@ -663,3 +663,8 @@
 [2025-11-17 17:45:00] Nombre de mails envoyés : 0
 [2025-11-17 17:45:00] Fin du job newsletter.
 
+===== [2025-11-17 17:50:00] Lancement du job newsletter =====
+[2025-11-17 17:50:00] Échec de l'envoi (code HTTP: 404)
+[2025-11-17 17:50:00] Nombre de mails envoyés : 0
+[2025-11-17 17:50:00] Fin du job newsletter.
+
