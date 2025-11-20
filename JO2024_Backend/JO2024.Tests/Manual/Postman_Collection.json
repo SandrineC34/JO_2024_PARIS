@@ -1,0 +1,366 @@
+{
+  "info": {
+    "name": "JO2024 - Tests Authentification",
+    "description": "Collection complète de tests pour l'authentification JO2024",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Inscription - Utilisateur Simple",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Success is true\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test(\"Token is present\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.token).to.be.a('string');",
+              "    pm.expect(jsonData.token.length).to.be.above(20);",
+              "});",
+              "",
+              "pm.test(\"User data is complete\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.user).to.have.property('id');",
+              "    pm.expect(jsonData.user).to.have.property('email');",
+              "    pm.expect(jsonData.user).to.have.property('prenom');",
+              "    pm.expect(jsonData.user).to.have.property('nom');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prenom\": \"Jean\",\n  \"nom\": \"Dupont\",\n  \"email\": \"jean.dupont@test.com\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "2. Inscription - Avec Newsletter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Success is true\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test(\"Newsletter confirmation in message\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include('newsletter');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prenom\": \"Marie\",\n  \"nom\": \"Martin\",\n  \"email\": \"marie.martin@test.com\",\n  \"password\": \"Password123!\",\n  \"newsletterPreferences\": {\n    \"subscribed\": true,\n    \"categories\": {\n      \"sport\": true,\n      \"evenements\": false,\n      \"billets\": true\n    },\n    \"sports\": [\n      {\n        \"id\": \"natation\",\n        \"name\": \"Natation\"\n      },\n      {\n        \"id\": \"athletisme\",\n        \"name\": \"Athlétisme\"\n      }\n    ]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "3. Inscription - Email Existant (ERREUR)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Success is false\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(false);",
+              "});",
+              "",
+              "pm.test(\"Error message about duplicate email\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include('déjà utilisée');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prenom\": \"Duplicate\",\n  \"nom\": \"User\",\n  \"email\": \"jean.dupont@test.com\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "4. Connexion - Identifiants Valides",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Success is true\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test(\"Token is present\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.token).to.be.a('string');",
+              "    ",
+              "    // Sauvegarder le token pour les requêtes suivantes",
+              "    pm.environment.set('authToken', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"jean.dupont@test.com\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "5. Connexion - Mot de Passe Incorrect (ERREUR)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test(\"Success is false\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(false);",
+              "});",
+              "",
+              "pm.test(\"Error message present\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include('incorrect');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"jean.dupont@test.com\",\n  \"password\": \"WrongPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "6. Récupérer Utilisateur Actuel",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"User data is returned\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Auth/current",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "current"]
+        }
+      }
+    },
+    {
+      "name": "7. Changement de Mot de Passe",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Success message\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include('succès');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/change-password",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "change-password"]
+        }
+      }
+    },
+    {
+      "name": "8. Mot de Passe Oublié",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Message is returned\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"jean.dupont@test.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/Auth/forgot-password",
+          "host": ["{{baseUrl}}"],
+          "path": ["Auth", "forgot-password"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    }
+  ]
+}

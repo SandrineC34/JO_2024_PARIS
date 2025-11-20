@@ -124,7 +124,7 @@ namespace JO2024.Core.Services
                 // ============================================
                 // ENVOI DE L'EMAIL DE BIENVENUE
                 // ============================================
-          // Remplace seulement cette méthode dans AuthService.cs
+
 
         private string GenerateWelcomeEmail(Utilisateur user, NewsletterPreferencesDto? newsletterPreferences)
         {

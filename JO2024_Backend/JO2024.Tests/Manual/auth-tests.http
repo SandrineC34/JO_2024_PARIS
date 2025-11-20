@@ -1,0 +1,287 @@
+###############################################
+# TESTS MANUELS - AUTHENTIFICATION JO2024
+# Pour VS Code REST Client Extension
+###############################################
+
+@baseUrl = http://localhost:5000/api
+@contentType = application/json
+
+###############################################
+# 1. INSCRIPTION - Utilisateur Simple
+###############################################
+
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Jean",
+  "nom": "Dupont",
+  "email": "jean.dupont@test.com",
+  "password": "Password123!",
+  "newsletterPreferences": null
+}
+
+### Réponse attendue : Status 200
+### {
+###   "success": true,
+###   "token": "eyJhbGc...",
+###   "message": "Inscription réussie ! Un email de bienvenue vous a été envoyé.",
+###   "user": {
+###     "id": 1,
+###     "prenom": "Jean",
+###     "nom": "Dupont",
+###     "email": "jean.dupont@test.com"
+###   }
+### }
+
+###############################################
+# 2. INSCRIPTION - Avec Newsletter
+###############################################
+
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Marie",
+  "nom": "Martin",
+  "email": "marie.martin@test.com",
+  "password": "Password123!",
+  "newsletterPreferences": {
+    "subscribed": true,
+    "categories": {
+      "sport": true,
+      "evenements": false,
+      "billets": true
+    },
+    "sports": [
+      {
+        "id": "natation",
+        "name": "Natation"
+      },
+      {
+        "id": "athletisme",
+        "name": "Athlétisme"
+      }
+    ]
+  }
+}
+
+### Réponse attendue : Status 200
+### Message devrait mentionner l'abonnement à la newsletter
+
+###############################################
+# 3. INSCRIPTION - Email Déjà Existant (ERREUR)
+###############################################
+
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Duplicate",
+  "nom": "User",
+  "email": "jean.dupont@test.com",
+  "password": "Password123!"
+}
+
+### Réponse attendue : Status 400
+### {
+###   "success": false,
+###   "message": "Cette adresse email est déjà utilisée"
+### }
+
+###############################################
+# 4. INSCRIPTION - Mot de Passe Invalide (ERREUR)
+###############################################
+
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Test",
+  "nom": "Weak",
+  "email": "weak@test.com",
+  "password": "weak"
+}
+
+### Réponse attendue : Status 400
+### Erreur de validation du mot de passe
+
+###############################################
+# 5. CONNEXION - Identifiants Valides
+###############################################
+
+POST {{baseUrl}}/Auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "jean.dupont@test.com",
+  "password": "Password123!"
+}
+
+### Réponse attendue : Status 200
+### {
+###   "success": true,
+###   "token": "eyJhbGc...",
+###   "message": "Connexion réussie",
+###   "user": { ... }
+### }
+
+### 🔐 SAUVEGARDER LE TOKEN POUR LES REQUÊTES SUIVANTES
+@authToken = {{TOKEN_FROM_LOGIN_RESPONSE}}
+
+###############################################
+# 6. CONNEXION - Email Incorrect (ERREUR)
+###############################################
+
+POST {{baseUrl}}/Auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "nonexistent@test.com",
+  "password": "Password123!"
+}
+
+### Réponse attendue : Status 401
+### {
+###   "success": false,
+###   "message": "Email ou mot de passe incorrect"
+### }
+
+###############################################
+# 7. CONNEXION - Mot de Passe Incorrect (ERREUR)
+###############################################
+
+POST {{baseUrl}}/Auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "jean.dupont@test.com",
+  "password": "WrongPassword123!"
+}
+
+### Réponse attendue : Status 401
+### Message d'erreur
+
+###############################################
+# 8. RÉCUPÉRER L'UTILISATEUR ACTUEL (Authentifié)
+###############################################
+
+GET {{baseUrl}}/Auth/current
+Authorization: Bearer {{authToken}}
+
+### Réponse attendue : Status 200
+### Détails de l'utilisateur connecté
+
+###############################################
+# 9. CHANGEMENT DE MOT DE PASSE (Authentifié)
+###############################################
+
+POST {{baseUrl}}/Auth/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "currentPassword": "Password123!",
+  "newPassword": "NewPassword123!"
+}
+
+### Réponse attendue : Status 200
+### {
+###   "message": "Mot de passe modifié avec succès"
+### }
+
+###############################################
+# 10. MOT DE PASSE OUBLIÉ - Demande de Réinitialisation
+###############################################
+
+POST {{baseUrl}}/Auth/forgot-password
+Content-Type: {{contentType}}
+
+{
+  "email": "jean.dupont@test.com"
+}
+
+### Réponse attendue : Status 200
+### {
+###   "message": "Si cet email existe, un lien de réinitialisation a été envoyé"
+### }
+
+###############################################
+# 11. RÉINITIALISATION DE MOT DE PASSE
+###############################################
+
+POST {{baseUrl}}/Auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "token": "RESET_TOKEN_FROM_EMAIL",
+  "email": "jean.dupont@test.com",
+  "newPassword": "ResetPassword123!"
+}
+
+### Réponse attendue : Status 200
+### {
+###   "message": "Mot de passe réinialisé avec succès"
+### }
+
+###############################################
+# 12. VÉRIFICATION EMAIL MAILHOG (Développement)
+###############################################
+
+### Ouvrir dans le navigateur : http://localhost:8025
+### Vérifier la réception des emails :
+### - Email de bienvenue après inscription
+### - Email de confirmation après changement de mot de passe
+### - Email de réinitialisation de mot de passe
+
+###############################################
+# TESTS DE VALIDATION - CAS LIMITES
+###############################################
+
+### 13. Email sans @
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Test",
+  "nom": "Invalid",
+  "email": "invalidemail",
+  "password": "Password123!"
+}
+
+### 14. Prénom trop court
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "A",
+  "nom": "Test",
+  "email": "short@test.com",
+  "password": "Password123!"
+}
+
+### 15. Mot de passe sans majuscule
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Test",
+  "nom": "NoUpper",
+  "email": "noupper@test.com",
+  "password": "password123!"
+}
+
+### 16. Mot de passe sans caractère spécial
+POST {{baseUrl}}/Auth/register
+Content-Type: {{contentType}}
+
+{
+  "prenom": "Test",
+  "nom": "NoSpecial",
+  "email": "nospecial@test.com",
+  "password": "Password123"
+}
+
+###############################################
+# FIN DES TESTS MANUELS
+###############################################

@@ -16,14 +16,13 @@ namespace JO2024.Core.Services;
 
 public class AdminService : IAdminService
 {
-    // ✅ CORRECTION : IUtilisateurRepository (avec majuscule)
     private readonly IUtilisateurRepository _utilisateurRepository;
     private readonly IOffreRepository _offreRepository;
     private readonly ICommandeRepository _commandeRepository;
     private readonly IBilletRepository _billetRepository;
 
     public AdminService(
-        IUtilisateurRepository utilisateurRepository, // ✅ Majuscule
+        IUtilisateurRepository utilisateurRepository,
         IOffreRepository offreRepository,
         ICommandeRepository commandeRepository,
         IBilletRepository billetRepository)
@@ -68,7 +67,11 @@ public class AdminService : IAdminService
                 DerniereConnexion = user.DerniereConnexion,
                 NombreCommandes = userWithDetails?.Commandes?.Count ?? 0,
                 NombreBillets = userWithDetails?.Billets?.Count ?? 0,
-                TotalDepense = userWithDetails?.Commandes.Sum(c => c.MontantTotal) ?? 0
+                //TotalDepense = userWithDetails?.Commandes.Sum(c => c.MontantTotal) ?? 0
+                TotalDepense = (userWithDetails != null && userWithDetails.Commandes != null) 
+                    ? userWithDetails.Commandes.Sum(c => c.MontantTotal)
+                    : 0
+
             });
         }
 
@@ -98,9 +101,12 @@ public class AdminService : IAdminService
             EstActif = user.EstActif,
             DateCreation = user.DateCreation,
             DerniereConnexion = user.DerniereConnexion,
-            NombreCommandes = user.Commandes.Count,
-            NombreBillets = user.Billets.Count,
-            TotalDepense = user.Commandes.Sum(c => c.MontantTotal)
+            //NombreCommandes = user.Commandes.Count,
+            // NombreBillets = user.Billets.Count,
+            //TotalDepense = user.Commandes.Sum(c => c.MontantTotal)
+            NombreCommandes = user.Commandes?.Count ?? 0,
+            NombreBillets = user.Billets?.Count ?? 0,
+            TotalDepense = user.Commandes?.Sum(c => c.MontantTotal) ?? 0
         };
     }
 

@@ -1,0 +1,23 @@
+Summary
+  Generated on: 20/11/2025 - 17:42:41
+  Coverage date: 20/11/2025 - 17:42:39
+  Parser: Cobertura
+  Assemblies: 1
+  Classes: 1
+  Files: 1
+  Line coverage: 87.5%
+  Covered lines: 416
+  Uncovered lines: 59
+  Coverable lines: 475
+  Total lines: 634
+  Branch coverage: 70.3% (45 of 64)
+  Covered branches: 45
+  Total branches: 64
+  Method coverage: 92.3% (12 of 13)
+  Full method coverage: 84.6% (11 of 13)
+  Covered methods: 12
+  Fully covered methods: 11
+  Total methods: 13
+
+JO2024.Core                          87.5%
+  JO2024.Core.Services.AuthService   87.5%
